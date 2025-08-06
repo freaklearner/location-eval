@@ -1,0 +1,28 @@
+Client Name: ,,,,,,,,,
+Location: ,,,,,,,,,
+Location Pin:,,,,,,,,,
+Parameter,Option 1 (Score 1),Option 2 (Score 2),Option 3 (Score 3),Option 4 (Score 4),Option 5 (Score 5),Weight (1-5),Max Score,Your score,Total
+Food Brand Presence,No Brands,Local vendors only,Small brands (Giani's),Mix of local + Domino’s/BDay,"Haldiram's, McD, CCD, KFC",4,20,5,20
+Clothing Brand Presence,No shops,Local/street only,"Cotton County, Cantabil","Reliance Trends, Max, Manyavar","H&M, ZARA, Levi’s",2,10,5,10
+Footwear Brand Presence,No shops,Local chappal vendors,"Bata, Khadim’s","Liberty, RedTape","Nike, Adidas, Puma",2,10,5,10
+Nearby Schools/Colleges,None,Small tuition centers,Govt. schools,Pvt. schools,College + Pvt. Schools,3,15,,0
+Petrol Pump Nearby,None,>1km away,800m–1km,400m–800m,<400m,2,10,,0
+Footfall,<100/day,100–300/day,300–500/day,500–1000/day,>1000/day,5,25,,0
+Target Audience Fit,Labour-dominated,Budget family crowd,Mixed lower-mid income,Students + Office Crowd,"Urban youth, couples, families",5,25,,0
+Competition Pricing (Momo),₹20–25 plate,₹30–35,₹40–45,₹50–60,₹70+ <marky rara ,3,15,,0
+Spending Capacity,Very low (<₹50 avg),Low,Medium,High,Very high (>₹200 avg),4,20,,0
+Nearby Businesses/Offices,None,Small vendors,Coaching/Service centers,Local offices,MNC/IT parks,4,20,,0
+Vehicle Mix (Mobility),Only cycles,Cycles + 2-wheelers,2W + Few Cars,2W + Cars + E-rickshaws,"Cars, SUVs, 2W mix",2,10,,0
+Residential/Society Presence,Isolated Area,Villages nearby,Mixed houses,Flats + Houses,Mid-High Rise Societies,4,20,,0
+Shopping Preferences Nearby,No shops,Kirana only,Kirana + Mart,Mart + Departmental,"Reliance, DMart, etc.",3,15,,0
+Fitness/Gym/Walking Culture,No park/gym,Small gym only,Local gym + park,Zym + Morning walkers,Gym chains + foot traffic,3,15,,0
+Zomato/Swiggy Delivery Density,Not available,Very Low,Low,Medium,High (Hotspot),4,20,,0
+Student vs Office Crowd Mix,Students only,Mostly Students,50-50 Mix,Mostly Working Professionals,Balanced Mix,3,15,,0
+Nightlife/Café Presence,None,Local stalls,Chai Tapri/Café,Café + Bars,Lounge + Multiplex + Cafés,3,15,,0
+Local Events/Weekly Bazaars,None,Monthly Melas,Bi-weekly flea,Weekly Bazaar,Multiple recurring events,2,10,,0
+Hospitals/Clinics Nearby,None,Only clinics,Govt Hospital,Pvt + Govt,Super-speciality + clinics,2,10,,0
+Police/Security Presence,Very far,Poor support,Ok support,Visible presence,Nearby + Friendly vendors,2,10,,0
+Outdoor Branding Scope,Not visible area,Hidden spot,Medium exposure,Visible to 1 lane,Visible to highway/crossroad,5,25,,0
+Footpath/Road Width,No footpath,<3 ft,3–6 ft,6–10 ft,10+ ft / Side Road 4lane,3,15,,0
+,,,,,,,350,15,40
+,,,,,,,,,11.43%
