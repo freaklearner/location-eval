@@ -5,6 +5,7 @@ import LocationInfo from './components/LocationInfo';
 import EvaluationForm from './components/EvaluationForm';
 import ScoreCard from './components/ScoreCard';
 import Report from './components/Report';
+import LocationEvaluator from './components/LocationEvaluator';
 
 function App() {
   const [locationInfo, setLocationInfo] = useState({
@@ -17,6 +18,7 @@ function App() {
   const [totalScore, setTotalScore] = useState(0);
   const [percentage, setPercentage] = useState(0);
   const [showReport, setShowReport] = useState(false);
+  const [evaluationMode, setEvaluationMode] = useState('ai'); // 'manual' or 'ai'
 
   // Calculate total score and percentage whenever scores change
   useEffect(() => {
@@ -56,6 +58,7 @@ function App() {
     });
     setScores({});
     setShowReport(false);
+    setEvaluationMode('ai');
   };
 
   if (showReport) {
@@ -84,43 +87,68 @@ function App() {
 
       <main className="main-content">
         <div className="container">
-          <div className="evaluation-layout">
-            <div className="evaluation-form-section">
-              <LocationInfo
-                locationInfo={locationInfo}
-                onLocationInfoChange={handleLocationInfoChange}
-              />
-              
-              <EvaluationForm
-                scores={scores}
-                onScoreChange={handleScoreChange}
-              />
-              
-              <div className="form-actions">
-                <button 
-                  className="btn btn-secondary"
-                  onClick={resetForm}
-                >
-                  Reset Form
-                </button>
-                <button 
-                  className="btn btn-primary"
-                  onClick={generateReport}
-                  disabled={!locationInfo.clientName || !locationInfo.location}
-                >
-                  Generate Report
-                </button>
-              </div>
-            </div>
-
-            <div className="score-section">
-              <ScoreCard
-                totalScore={totalScore}
-                percentage={percentage}
-                maxScore={TOTAL_MAX_SCORE}
-              />
+          {/* Evaluation Mode Selector */}
+          <div className="mode-selector">
+            <h2>Choose Evaluation Method</h2>
+            <div className="mode-buttons">
+              <button 
+                className={`mode-btn ${evaluationMode === 'manual' ? 'active' : ''}`}
+                onClick={() => setEvaluationMode('manual')}
+              >
+                📝 Manual Evaluation
+                <span>Traditional parameter-by-parameter assessment</span>
+              </button>
+              <button 
+                className={`mode-btn ${evaluationMode === 'ai' ? 'active' : ''}`}
+                onClick={() => setEvaluationMode('ai')}
+              >
+                🤖 AI-Powered Analysis
+                <span>Automated evaluation using Google Maps & Gemini AI</span>
+              </button>
             </div>
           </div>
+
+          {evaluationMode === 'manual' ? (
+            <div className="evaluation-layout">
+              <div className="evaluation-form-section">
+                <LocationInfo
+                  locationInfo={locationInfo}
+                  onLocationInfoChange={handleLocationInfoChange}
+                />
+                
+                <EvaluationForm
+                  scores={scores}
+                  onScoreChange={handleScoreChange}
+                />
+                
+                <div className="form-actions">
+                  <button 
+                    className="btn btn-secondary"
+                    onClick={resetForm}
+                  >
+                    Reset Form
+                  </button>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={generateReport}
+                    disabled={!locationInfo.clientName || !locationInfo.location}
+                  >
+                    Generate Report
+                  </button>
+                </div>
+              </div>
+
+              <div className="score-section">
+                <ScoreCard
+                  totalScore={totalScore}
+                  percentage={percentage}
+                  maxScore={TOTAL_MAX_SCORE}
+                />
+              </div>
+            </div>
+          ) : (
+            <LocationEvaluator />
+          )}
         </div>
       </main>
     </div>

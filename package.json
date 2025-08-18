@@ -1,14 +1,16 @@
 {
   "name": "location-evaluation-tool",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Location Evaluation Tool for The Momos Mafia franchise partner assessment",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
+    "@google/generative-ai": "^0.24.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "axios": "^1.11.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
@@ -16,7 +18,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "backend": "cd backend && npm run start:dev",
+    "dev": "concurrently \"npm run backend\" \"npm start\"",
+    "install-all": "npm install && cd backend && npm install",
+    "build-all": "npm run build && cd backend && npm run build"
   },
   "eslintConfig": {
     "extends": [
@@ -35,5 +41,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
-} 
+}

@@ -1,0 +1,307 @@
+{
+  "evaluationParameters": [
+    {
+      "id": "food_brand_presence",
+      "name": "Food Brand Presence",
+      "description": "Premium food brands nearby indicating spending capacity",
+      "weight": 4,
+      "maxScore": 5,
+      "category": "high_priority",
+      "brands": [
+        "McDonald's", "KFC", "Domino's", "Pizza Hut", "Subway",
+        "Burger King", "Starbucks", "Costa Coffee", "Cafe Coffee Day",
+        "Haldiram's", "Bikanervala", "Sagar Ratna", "Wow! Momo",
+        "Faasos", "Box8", "Behrouz Biryani", "Oven Story Pizza"
+      ]
+    },
+    {
+      "id": "clothing_brand_presence", 
+      "name": "Clothing Brand Presence",
+      "description": "Market sophistication indicator through fashion brands",
+      "weight": 2,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "brands": [
+        "H&M", "Zara", "Uniqlo", "Forever 21", "Marks & Spencer",
+        "Reliance Trends", "Max Fashion", "Lifestyle", "Shoppers Stop",
+        "Pantaloons", "Central", "Westside", "FabIndia", "W"
+      ]
+    },
+    {
+      "id": "footwear_brand_presence",
+      "name": "Footwear Brand Presence", 
+      "description": "Consumer spending patterns through shoe brands",
+      "weight": 2,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "brands": [
+        "Nike", "Adidas", "Puma", "Reebok", "Converse", "Vans",
+        "Bata", "Liberty Shoes", "Red Tape", "Woodland", "Sketchers",
+        "Metro Shoes", "Inc.5", "Mochi"
+      ]
+    },
+    {
+      "id": "nearby_colleges_universities",
+      "name": "Nearby Colleges/Universities",
+      "description": "Target demographic proximity - college students and young adults",
+      "weight": 4,
+      "maxScore": 5,
+      "category": "high_priority",
+      "searchTypes": ["university", "college"]
+    },
+    {
+      "id": "petrol_pump_nearby",
+      "name": "Petrol Pump Nearby",
+      "description": "Convenience and accessibility indicator",
+      "weight": 2,
+      "maxScore": 5,
+      "category": "lower_priority",
+      "searchTypes": ["gas_station"]
+    },
+    {
+      "id": "footfall",
+      "name": "Footfall",
+      "description": "Critical customer traffic metric",
+      "weight": 5,
+      "maxScore": 5,
+      "category": "high_priority",
+      "calculatedFrom": ["total_businesses", "business_density"]
+    },
+    {
+      "id": "target_audience_fit",
+      "name": "Target Audience Fit",
+      "description": "Demographics alignment with target customers: college students, young professionals, young parents, hygiene-conscious foodies",
+      "weight": 5,
+      "maxScore": 5,
+      "category": "high_priority",
+      "calculatedFrom": ["universities", "colleges", "offices", "commercial_activity", "family_establishments", "health_conscious_venues"]
+    },
+    {
+      "id": "competition_pricing_momo",
+      "name": "Street Food Competition Analysis",
+      "description": "Competition analysis for Indian street food momos/dumplings market including pricing and vendor density",
+      "weight": 3,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "searchQueries": ["momo", "dumpling", "momos", "street food", "chaat", "tibetan food", "steam momo", "fried momo"]
+    },
+    {
+      "id": "spending_capacity",
+      "name": "Spending Capacity",
+      "description": "Local economic conditions and purchasing power",
+      "weight": 4,
+      "maxScore": 5,
+      "category": "high_priority",
+      "calculatedFrom": ["premium_brands", "average_ratings", "high_rated_places"]
+    },
+    {
+      "id": "nearby_businesses_offices",
+      "name": "Nearby Businesses/Offices",
+      "description": "Commercial activity indicating office workers",
+      "weight": 4,
+      "maxScore": 5,
+      "category": "high_priority",
+      "searchTypes": ["establishment", "point_of_interest"]
+    },
+    {
+      "id": "vehicle_mix_mobility",
+      "name": "Vehicle Mix & Mobility",
+      "description": "Transportation patterns and accessibility",
+      "weight": 2,
+      "maxScore": 5,
+      "category": "lower_priority",
+      "searchTypes": ["bus_station", "subway_station", "taxi_stand"]
+    },
+    {
+      "id": "residential_society_presence",
+      "name": "Residential/Society Presence",
+      "description": "Customer base density from residential areas",
+      "weight": 4,
+      "maxScore": 5,
+      "category": "high_priority",
+      "calculatedFrom": ["neighborhood_density", "residential_indicators"]
+    },
+    {
+      "id": "shopping_preferences_nearby",
+      "name": "Shopping Preferences Nearby",
+      "description": "Consumer behavior indicators",
+      "weight": 3,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "searchTypes": ["shopping_mall", "store"],
+      "brands": [
+        "DMart", "Big Bazaar", "Reliance Fresh", "More", "Spencer's",
+        "Hypercity", "Star Bazaar", "Easyday", "Nature's Basket"
+      ]
+    },
+    {
+      "id": "fitness_gym_walking_culture",
+      "name": "Fitness/Gym Culture",
+      "description": "Health-conscious demographics indicator",
+      "weight": 3,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "searchTypes": ["gym", "fitness_center"],
+      "brands": ["Gold's Gym", "Anytime Fitness", "Cult.fit", "Snap Fitness", "Talwalkars"]
+    },
+    {
+      "id": "zomato_swiggy_delivery_density",
+      "name": "Zomato/Swiggy Delivery Density",
+      "description": "Food delivery ecosystem strength",
+      "weight": 4,
+      "maxScore": 5,
+      "category": "high_priority",
+      "calculatedFrom": ["restaurant_density", "food_establishments"]
+    },
+    {
+      "id": "student_vs_office_crowd_mix",
+      "name": "Student vs Office Crowd Mix",
+      "description": "Peak time analysis and customer variety",
+      "weight": 3,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "calculatedFrom": ["schools", "universities", "offices", "commercial_buildings"]
+    },
+    {
+      "id": "nightlife_cafe_presence",
+      "name": "Nightlife/Café Presence",
+      "description": "Evening business potential",
+      "weight": 3,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "searchQueries": ["cafe", "bar", "pub", "nightclub", "lounge", "coffee shop"]
+    },
+    {
+      "id": "local_events_weekly_bazaars",
+      "name": "Local Events/Weekly Bazaars",
+      "description": "Community engagement and foot traffic events",
+      "weight": 2,
+      "maxScore": 5,
+      "category": "lower_priority",
+      "searchQueries": ["market", "bazaar", "fair", "event venue", "community center"]
+    },
+    {
+      "id": "hospitals_clinics_nearby",
+      "name": "Hospitals/Clinics Nearby",
+      "description": "Healthcare accessibility and foot traffic",
+      "weight": 2,
+      "maxScore": 5,
+      "category": "lower_priority",
+      "searchTypes": ["hospital", "clinic", "pharmacy"]
+    },
+    {
+      "id": "police_security_presence",
+      "name": "Police/Security Presence",
+      "description": "Safety and security for business operations",
+      "weight": 2,
+      "maxScore": 5,
+      "category": "lower_priority",
+      "searchTypes": ["police", "security"]
+    },
+    {
+      "id": "outdoor_branding_scope",
+      "name": "Outdoor Branding Scope",
+      "description": "Marketing visibility potential",
+      "weight": 5,
+      "maxScore": 5,
+      "category": "high_priority",
+      "calculatedFrom": ["footfall", "visibility", "commercial_activity"]
+    },
+    {
+      "id": "footpath_road_width",
+      "name": "Footpath/Road Width",
+      "description": "Physical accessibility and setup space",
+      "weight": 3,
+      "maxScore": 5,
+      "category": "medium_priority",
+      "calculatedFrom": ["accessibility_indicators", "infrastructure_quality"]
+    }
+  ],
+  "businessSearchTypes": [
+    {
+      "key": "restaurants",
+      "type": "restaurant",
+      "description": "All restaurants and eateries"
+    },
+    {
+      "key": "food",
+      "type": "food",
+      "description": "Food establishments and vendors"
+    },
+    {
+      "key": "schools",
+      "type": "school",
+      "description": "Educational institutions - schools"
+    },
+    {
+      "key": "universities",
+      "type": "university",
+      "description": "Higher education institutions"
+    },
+    {
+      "key": "hospitals",
+      "type": "hospital",
+      "description": "Healthcare facilities"
+    },
+    {
+      "key": "gas_stations",
+      "type": "gas_station",
+      "description": "Fuel stations"
+    },
+    {
+      "key": "shopping_malls",
+      "type": "shopping_mall",
+      "description": "Shopping centers and malls"
+    },
+    {
+      "key": "gyms",
+      "type": "gym",
+      "description": "Fitness centers and gyms"
+    },
+    {
+      "key": "banks",
+      "type": "bank",
+      "description": "Banking facilities"
+    },
+    {
+      "key": "atms",
+      "type": "atm",
+      "description": "ATM locations"
+    },
+    {
+      "key": "cafes",
+      "type": "cafe",
+      "description": "Coffee shops and cafes"
+    },
+    {
+      "key": "pharmacies",
+      "type": "pharmacy",
+      "description": "Medical pharmacies"
+    }
+  ],
+  "brandCategories": {
+    "food_brands": {
+      "premium": ["Starbucks", "Costa Coffee", "McDonald's", "KFC", "Pizza Hut", "Domino's", Sagar Ratna", "Haldiram's],
+      "mid_range": ["Cafe Coffee Day", "Subway", "Burger King", ", "Bikanervala"],
+      "local": ["Local restaurants"]
+    },
+    "retail_brands": {
+      "international": ["H&M", "Zara", "Uniqlo", "Nike", "Adidas"],
+      "national": ["Reliance Trends", "Max Fashion", "Bata", "Liberty"],
+      "regional": ["Local stores", "Regional chains"]
+    }
+  },
+  "scoringRules": {
+    "excellent": { "min": 4.5, "description": "Exceptional for business" },
+    "good": { "min": 3.5, "description": "Good potential" },
+    "average": { "min": 2.5, "description": "Average conditions" },
+    "poor": { "min": 1.5, "description": "Below average" },
+    "very_poor": { "min": 0, "description": "Not suitable" }
+  },
+  "viabilityThresholds": {
+    "highly_recommended": { "min": 80, "grade": "A" },
+    "recommended": { "min": 70, "grade": "B" },
+    "conditional": { "min": 60, "grade": "C" },
+    "not_recommended": { "min": 0, "grade": "D" }
+  }
+} 
