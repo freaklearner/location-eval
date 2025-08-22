@@ -9,8 +9,8 @@ COPY package*.json ./
 COPY src/ ./src/
 COPY public/ ./public/
 
-# Install frontend dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Build the React app
 RUN npm run build
@@ -26,11 +26,14 @@ COPY backend/package*.json ./
 COPY backend/tsconfig.json ./
 COPY backend/src/ ./src/
 
-# Install backend dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Build the NestJS app
 RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --production
 
 # Production stage
 FROM node:18-alpine AS production
