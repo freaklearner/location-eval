@@ -32,6 +32,9 @@ RUN npm ci
 # Build the NestJS app
 RUN npm run build
 
+# Copy config files to dist directory (since TypeScript doesn't copy JSON files by default)
+RUN cp -r ./src/config ./dist/config
+
 # Remove dev dependencies after build
 RUN npm prune --production
 
@@ -53,8 +56,7 @@ COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/dist ./backend/di
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/node_modules ./backend/node_modules
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/package.json ./backend/package.json
 
-# Copy backend config files
-COPY --chown=nodejs:nodejs backend/src/config/ ./backend/src/config/
+# Config files are already included in the dist directory from the build stage
 
 # Copy frontend build
 COPY --from=frontend-builder --chown=nodejs:nodejs /app/frontend/build ./frontend/build
