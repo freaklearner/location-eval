@@ -5,7 +5,7 @@ const BASE_URL = 'https://maps.googleapis.com/maps/api/place';
 
 // Note: Direct API calls from frontend will face CORS issues
 // In production, these calls should be made from a backend server
-const DEMO_MODE = true; // Set to false when backend is available
+const DEMO_MODE = false; // Set to false when backend is available
 
 const useGoogleMapsAPI = () => {
   const [loading, setLoading] = useState(false);

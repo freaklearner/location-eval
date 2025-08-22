@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LocationModule } from './modules/location/location.module';
 import { GeminiModule } from './modules/gemini/gemini.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { GeminiModule } from './modules/gemini/gemini.module';
     }),
     LocationModule,
     GeminiModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [],

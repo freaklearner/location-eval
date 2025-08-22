@@ -3,17 +3,12 @@ import backendService from '../services/backendService';
 import demoService from '../services/demoService';
 import LocationInput from './LocationInput';
 import AnalysisProgress from './AnalysisProgress';
-import ProgressiveAnalysisProgress from './ProgressiveAnalysisProgress';
 import AnalysisResults from './AnalysisResults';
 
 const LocationEvaluator = () => {
-  const [analysisState, setAnalysisState] = useState('input'); // 'input', 'analyzing', 'progressive', 'results', 'error'
+  const [analysisState, setAnalysisState] = useState('input'); // 'input', 'analyzing', 'results', 'error'
   const [analysisResults, setAnalysisResults] = useState(null);
   const [progressMessage, setProgressMessage] = useState('');
-  const [progressiveData, setProgressiveData] = useState(null);
-  const [currentPhase, setCurrentPhase] = useState(0);
-  const [timeEstimate, setTimeEstimate] = useState('');
-  const [analysisMode, setAnalysisMode] = useState('progressive'); // 'progressive' or 'complete'
   const [error, setError] = useState(null);
   const [backendAvailable, setBackendAvailable] = useState(null); // null = checking, true/false = result
 
@@ -44,69 +39,9 @@ const LocationEvaluator = () => {
     console.log('📍 Received coordinates:', coordinates);
     console.log('ℹ️ Received locationInfo:', locationInfo);
     console.log('🌐 Backend available:', backendAvailable);
-    console.log('🎯 Analysis mode:', analysisMode);
     
-    // Choose analysis method based on mode
-    if (analysisMode === 'progressive' && backendAvailable) {
-      return handleProgressiveAnalysis(coordinates, locationInfo);
-    } else {
-      return handleCompleteAnalysis(coordinates, locationInfo);
-    }
-  };
-
-  const handleProgressiveAnalysis = async (coordinates, locationInfo) => {
-    setAnalysisState('progressive');
-    setError(null);
-    setProgressiveData(null);
-    setCurrentPhase(0);
-
-    try {
-      console.log('🚀 Starting progressive analysis...');
-      
-      const progressCallback = (progressInfo) => {
-        if (typeof progressInfo === 'object') {
-          setCurrentPhase(progressInfo.phase || 0);
-          setProgressMessage(progressInfo.message || '');
-          setTimeEstimate(progressInfo.timeEstimate || '');
-          
-          if (progressInfo.data) {
-            setProgressiveData(progressInfo.data);
-          }
-          
-          if (progressInfo.isComplete) {
-            // Final results received
-            const finalResults = {
-              locationData: progressInfo.data.locationAnalysis,
-              aiAnalysis: progressInfo.data.aiEvaluation,
-              locationInfo: progressInfo.data.locationInfo,
-              areaCharacteristics: progressInfo.data.areaCharacteristics,
-              timestamp: progressInfo.data.timestamp,
-              coordinates: progressInfo.data.coordinates,
-              progressiveResults: progressInfo.data.progressiveResults,
-              source: 'backend-progressive'
-            };
-            
-            setAnalysisResults(finalResults);
-            setAnalysisState('results');
-          }
-        } else {
-          // Legacy string message support
-          setProgressMessage(progressInfo);
-        }
-      };
-
-      await backendService.analyzeLocationProgressive(
-        coordinates,
-        locationInfo,
-        progressCallback
-      );
-
-    } catch (err) {
-      console.error('❌ Progressive analysis failed:', err);
-      setError(err.message || 'Progressive analysis failed. Please try again.');
-      setAnalysisState('error');
-      setProgressMessage('❌ Progressive analysis failed');
-    }
+    // Always use complete analysis
+    return handleCompleteAnalysis(coordinates, locationInfo);
   };
 
   const handleCompleteAnalysis = async (coordinates, locationInfo) => {
@@ -133,6 +68,7 @@ const LocationEvaluator = () => {
           aiAnalysis: backendResults.aiEvaluation,
           locationInfo: backendResults.locationInfo,
           areaCharacteristics: backendResults.areaCharacteristics,
+          confidenceScore: backendResults.confidenceScore,
           timestamp: backendResults.timestamp,
           coordinates: backendResults.coordinates,
           source: 'backend'
@@ -176,9 +112,6 @@ const LocationEvaluator = () => {
     setAnalysisState('input');
     setAnalysisResults(null);
     setProgressMessage('');
-    setProgressiveData(null);
-    setCurrentPhase(0);
-    setTimeEstimate('');
     setError(null);
   };
 
@@ -193,51 +126,14 @@ const LocationEvaluator = () => {
       {analysisState === 'input' && (
         <div className="input-with-options">
           <div className="analysis-mode-selector">
-            <h3>🚀 Choose Analysis Method</h3>
-            <div className="mode-options">
-              <label className={`mode-option ${analysisMode === 'progressive' ? 'selected' : ''}`}>
-                <input 
-                  type="radio" 
-                  value="progressive" 
-                  checked={analysisMode === 'progressive'} 
-                  onChange={(e) => setAnalysisMode(e.target.value)}
-                  disabled={!backendAvailable}
-                />
-                <div className="mode-content">
-                  <div className="mode-title">⚡ Smart Progressive Analysis</div>
-                  <div className="mode-description">Get actionable insights in 15-20 seconds with progressive enhancement</div>
-                  {!backendAvailable && <div className="mode-disabled">Backend required</div>}
-                </div>
-              </label>
-              
-              <label className={`mode-option ${analysisMode === 'complete' ? 'selected' : ''}`}>
-                <input 
-                  type="radio" 
-                  value="complete" 
-                  checked={analysisMode === 'complete'} 
-                  onChange={(e) => setAnalysisMode(e.target.value)}
-                />
-                <div className="mode-content">
-                  <div className="mode-title">🎯 Complete Analysis</div>
-                  <div className="mode-description">Traditional comprehensive analysis (60-90 seconds)</div>
-                </div>
-              </label>
+            <h3>🚀 Location Analysis</h3>
+            <div className="mode-description">
+              Complete location analysis with AI-powered insights
             </div>
           </div>
           
           <LocationInput onSubmit={handleLocationSubmit} />
         </div>
-      )}
-
-      {analysisState === 'progressive' && (
-        <ProgressiveAnalysisProgress 
-          phase={currentPhase}
-          message={progressMessage}
-          timeEstimate={timeEstimate}
-          isComplete={false}
-          data={progressiveData}
-          onCancel={handleReset}
-        />
       )}
 
       {analysisState === 'analyzing' && (

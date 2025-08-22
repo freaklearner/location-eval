@@ -391,7 +391,10 @@ export class LocationService {
         key: this.googleMapsApiKey,
       };
 
-      const response = await axios.get(url, { params });
+      const response = await axios.get(url, { 
+        params,
+        timeout: 30000 // 30 seconds timeout for Google Maps API calls
+      });
       
       if (response.data.status === 'OVER_QUERY_LIMIT') {
         throw new HttpException('API quota exceeded', HttpStatus.TOO_MANY_REQUESTS);
@@ -406,6 +409,15 @@ export class LocationService {
       if (error instanceof HttpException) {
         throw error;
       }
+      
+      // Handle timeout specifically
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        throw new HttpException(
+          `Google Maps API request timed out after 30 seconds. Please try again or use a smaller search radius.`,
+          HttpStatus.REQUEST_TIMEOUT,
+        );
+      }
+      
       throw new HttpException(
         `Failed to fetch nearby businesses: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -429,7 +441,10 @@ export class LocationService {
         key: this.googleMapsApiKey,
       };
 
-      const response = await axios.get(url, { params });
+      const response = await axios.get(url, { 
+        params,
+        timeout: 30000 // 30 seconds timeout for Google Maps API calls
+      });
       
       if (response.data.status === 'OVER_QUERY_LIMIT') {
         throw new HttpException('API quota exceeded', HttpStatus.TOO_MANY_REQUESTS);
@@ -444,6 +459,15 @@ export class LocationService {
       if (error instanceof HttpException) {
         throw error;
       }
+      
+      // Handle timeout specifically
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        throw new HttpException(
+          `Google Maps API text search timed out after 30 seconds. Please try again or use a smaller search radius.`,
+          HttpStatus.REQUEST_TIMEOUT,
+        );
+      }
+      
       throw new HttpException(
         `Failed to search by text: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -459,7 +483,10 @@ export class LocationService {
         key: this.googleMapsApiKey,
       };
 
-      const response = await axios.get(url, { params });
+      const response = await axios.get(url, { 
+        params,
+        timeout: 30000 // 30 seconds timeout for Google Maps API calls
+      });
       
       if (response.data.status === 'OVER_QUERY_LIMIT') {
         throw new HttpException('API quota exceeded', HttpStatus.TOO_MANY_REQUESTS);
@@ -474,6 +501,15 @@ export class LocationService {
       if (error instanceof HttpException) {
         throw error;
       }
+      
+      // Handle timeout specifically
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        throw new HttpException(
+          `Google Maps API geocoding timed out after 30 seconds. Please try again.`,
+          HttpStatus.REQUEST_TIMEOUT,
+        );
+      }
+      
       throw new HttpException(
         `Failed to get location info: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -481,271 +517,9 @@ export class LocationService {
     }
   }
 
-  /**
-   * 🚀 PROGRESSIVE ANALYSIS: Phase-based loading for 15-20 second initial insights
-   */
-  async analyzeLocationProgressive(lat: number, lng: number, radius: number = 1000, progressCallback?: (phase: number, data: any) => void): Promise<any> {
-    console.log(`🚀 PROGRESSIVE ANALYSIS: Starting phased analysis for lat=${lat}, lng=${lng}, radius=${radius}m`);
 
-    try {
-      const analysis = {
-        coordinates: { lat, lng, radius },
-        businesses: {},
-        brands: {},
-        summary: {},
-        rawData: {},
-        config: this.evaluationConfig,
-        progressiveResults: []
-      };
 
-      // Phase 1: Critical Data (15-20 seconds) - High priority business types and top brands
-      console.log('📊 PHASE 1: Critical data collection starting...');
-      const phase1Start = Date.now();
-      
-      const criticalBusinessTypes = ['restaurants', 'universities', 'hospitals', 'shopping_malls'];
-      const topBrands = ['McDonald\'s', 'KFC', 'Domino\'s', 'Pizza Hut', 'Starbucks', 'Wow! Momo', 'Haldiram\'s', 'Cafe Coffee Day'];
 
-      // Collect critical business data
-      for (const type of criticalBusinessTypes) {
-        try {
-          const result = await this.findNearbyBusinesses(lat, lng, type, radius);
-          const validatedResults = this.validateRadiusCompliance(result.results || [], lat, lng, radius);
-          const filteredResults = validatedResults.map(r => r.place);
-
-          analysis.businesses[type] = filteredResults;
-          analysis.rawData[type] = {
-            ...result,
-            filteredCount: filteredResults.length,
-            originalCount: result.results?.length || 0,
-            radiusCompliant: true
-          };
-
-          await new Promise(resolve => setTimeout(resolve, 50)); // Small delay
-        } catch (error) {
-          console.warn(`Phase 1 - Failed to search for ${type}:`, error.message);
-          analysis.businesses[type] = [];
-        }
-      }
-
-      // Collect top brand data
-      for (const brand of topBrands) {
-        try {
-          const result = await this.searchByText(lat, lng, brand, radius);
-          const validatedResults = this.validateRadiusCompliance(result.results || [], lat, lng, radius);
-          const validPlaces = validatedResults
-            .map(r => r.place)
-            .filter(place => this.isValidBrandMatch(brand, place));
-
-          analysis.brands[brand] = {
-            found: validPlaces.length > 0,
-            places: validPlaces,
-            searchRadius: radius,
-            radiusCompliant: true
-          };
-
-          await new Promise(resolve => setTimeout(resolve, 50));
-        } catch (error) {
-          console.warn(`Phase 1 - Failed to search for ${brand}:`, error.message);
-          analysis.brands[brand] = { found: false, places: [], searchRadius: radius, radiusCompliant: true };
-        }
-      }
-
-      // Generate Phase 1 summary
-      const phase1Summary = this.generateSummary(analysis.businesses, analysis.brands, lat, lng, radius);
-      analysis.summary = phase1Summary;
-      analysis.progressiveResults.push({
-        phase: 1,
-        timestamp: new Date().toISOString(),
-        duration: Date.now() - phase1Start,
-        data: { ...analysis }
-      });
-
-      console.log(`✅ PHASE 1 COMPLETE: ${Date.now() - phase1Start}ms - Critical data collected`);
-      
-      if (progressCallback) {
-        progressCallback(1, {
-          phase: 1,
-          message: '📊 Phase 1 complete: Critical business data collected',
-          timeEstimate: '15-20 seconds',
-          data: analysis,
-          isComplete: false
-        });
-      }
-
-      // Phase 2: Enhanced Data (30-45 seconds) - Additional business types and mid-tier brands
-      console.log('📈 PHASE 2: Enhanced data collection starting...');
-      const phase2Start = Date.now();
-      
-      const enhancedBusinessTypes = ['cafes', 'gyms', 'banks', 'gas_stations', 'pharmacies', 'bakery'];
-      const midTierBrands = ['H&M', 'Zara', 'Nike', 'Adidas', 'DMart', 'Reliance Trends', 'Big Bazaar', 'Bata'];
-
-      // Collect enhanced business data
-      for (const type of enhancedBusinessTypes) {
-        try {
-          const result = await this.findNearbyBusinesses(lat, lng, type, radius);
-          const validatedResults = this.validateRadiusCompliance(result.results || [], lat, lng, radius);
-          const filteredResults = validatedResults.map(r => r.place);
-
-          analysis.businesses[type] = filteredResults;
-          analysis.rawData[type] = {
-            ...result,
-            filteredCount: filteredResults.length,
-            originalCount: result.results?.length || 0,
-            radiusCompliant: true
-          };
-
-          await new Promise(resolve => setTimeout(resolve, 50));
-        } catch (error) {
-          console.warn(`Phase 2 - Failed to search for ${type}:`, error.message);
-          analysis.businesses[type] = [];
-        }
-      }
-
-      // Collect mid-tier brand data
-      for (const brand of midTierBrands) {
-        try {
-          const result = await this.searchByText(lat, lng, brand, radius);
-          const validatedResults = this.validateRadiusCompliance(result.results || [], lat, lng, radius);
-          const validPlaces = validatedResults
-            .map(r => r.place)
-            .filter(place => this.isValidBrandMatch(brand, place));
-
-          analysis.brands[brand] = {
-            found: validPlaces.length > 0,
-            places: validPlaces,
-            searchRadius: radius,
-            radiusCompliant: true
-          };
-
-          await new Promise(resolve => setTimeout(resolve, 50));
-        } catch (error) {
-          console.warn(`Phase 2 - Failed to search for ${brand}:`, error.message);
-          analysis.brands[brand] = { found: false, places: [], searchRadius: radius, radiusCompliant: true };
-        }
-      }
-
-      // Update summary with Phase 2 data
-      const phase2Summary = this.generateSummary(analysis.businesses, analysis.brands, lat, lng, radius);
-      analysis.summary = phase2Summary;
-      analysis.progressiveResults.push({
-        phase: 2,
-        timestamp: new Date().toISOString(),
-        duration: Date.now() - phase2Start,
-        data: { ...analysis }
-      });
-
-      console.log(`✅ PHASE 2 COMPLETE: ${Date.now() - phase2Start}ms - Enhanced data collected`);
-      
-      if (progressCallback) {
-        progressCallback(2, {
-          phase: 2,
-          message: '📈 Phase 2 complete: Enhanced business analysis',
-          timeEstimate: '30-45 seconds',
-          data: analysis,
-          isComplete: false
-        });
-      }
-
-      // Phase 3: Comprehensive Data (60-90 seconds) - Remaining business types and brands
-      console.log('🔍 PHASE 3: Comprehensive data collection starting...');
-      const phase3Start = Date.now();
-      
-      const remainingBusinessTypes = ['atms', 'parks', 'bus_stations', 'metro_stations', 'railway_stations', 'temples', 'places_of_worship'];
-      const remainingBrands = this.getAllBrandsFromConfig().filter(brand => 
-        !topBrands.includes(brand) && !midTierBrands.includes(brand)
-      );
-
-      // Collect remaining business data
-      for (const type of remainingBusinessTypes) {
-        try {
-          const result = await this.findNearbyBusinesses(lat, lng, type, radius);
-          const validatedResults = this.validateRadiusCompliance(result.results || [], lat, lng, radius);
-          const filteredResults = validatedResults.map(r => r.place);
-
-          analysis.businesses[type] = filteredResults;
-          analysis.rawData[type] = {
-            ...result,
-            filteredCount: filteredResults.length,
-            originalCount: result.results?.length || 0,
-            radiusCompliant: true
-          };
-
-          await new Promise(resolve => setTimeout(resolve, 50));
-        } catch (error) {
-          console.warn(`Phase 3 - Failed to search for ${type}:`, error.message);
-          analysis.businesses[type] = [];
-        }
-      }
-
-      // Collect remaining brand data (in batches to avoid overwhelming)
-      const brandBatches = this.chunkArray(remainingBrands, 5);
-      for (const brandBatch of brandBatches) {
-        await Promise.all(brandBatch.map(async (brand) => {
-          try {
-            const result = await this.searchByText(lat, lng, brand, radius);
-            const validatedResults = this.validateRadiusCompliance(result.results || [], lat, lng, radius);
-            const validPlaces = validatedResults
-              .map(r => r.place)
-              .filter(place => this.isValidBrandMatch(brand, place));
-
-            analysis.brands[brand] = {
-              found: validPlaces.length > 0,
-              places: validPlaces,
-              searchRadius: radius,
-              radiusCompliant: true
-            };
-          } catch (error) {
-            console.warn(`Phase 3 - Failed to search for ${brand}:`, error.message);
-            analysis.brands[brand] = { found: false, places: [], searchRadius: radius, radiusCompliant: true };
-          }
-        }));
-        
-        await new Promise(resolve => setTimeout(resolve, 200)); // Longer delay between batches
-      }
-
-      // Final summary
-      const finalSummary = this.generateSummary(analysis.businesses, analysis.brands, lat, lng, radius);
-      analysis.summary = finalSummary;
-      analysis.progressiveResults.push({
-        phase: 3,
-        timestamp: new Date().toISOString(),
-        duration: Date.now() - phase3Start,
-        data: { ...analysis }
-      });
-
-      console.log(`✅ PHASE 3 COMPLETE: ${Date.now() - phase3Start}ms - Comprehensive analysis finished`);
-      
-      if (progressCallback) {
-        progressCallback(3, {
-          phase: 3,
-          message: '🔍 Phase 3 complete: Comprehensive analysis finished',
-          timeEstimate: '60-90 seconds',
-          data: analysis,
-          isComplete: true
-        });
-      }
-
-      console.log(`🎯 PROGRESSIVE ANALYSIS COMPLETE: All phases finished - ${analysis.progressiveResults.length} phases`);
-      return analysis;
-
-    } catch (error) {
-      throw new HttpException(
-        `Progressive analysis failed: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  /**
-   * Utility method to chunk arrays for batch processing
-   */
-  private chunkArray<T>(array: T[], chunkSize: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-      chunks.push(array.slice(i, i + chunkSize));
-    }
-    return chunks;
-  }
 
   /**
    * 🎯 COMPLETELY REWRITTEN: Strict radius compliance and accurate filtering

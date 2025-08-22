@@ -25,13 +25,30 @@ export class GeminiService {
   async evaluateLocation(request: EvaluationRequest): Promise<any> {
     try {
       const prompt = this.createEvaluationPrompt(request.locationData, request.areaCharacteristics);
-      const result = await this.model.generateContent(prompt);
+      
+      // Add timeout for Gemini API call
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Gemini API timeout after 2 minutes')), 120000);
+      });
+      
+      const geminiPromise = this.model.generateContent(prompt);
+      
+      const result = await Promise.race([geminiPromise, timeoutPromise]);
       const response = await result.response;
       const text = response.text();
 
       return this.parseEvaluationResponse(text);
     } catch (error) {
       console.error('Gemini analysis failed:', error);
+      
+      // Handle timeout specifically
+      if (error.message.includes('timeout')) {
+        throw new HttpException(
+          `AI evaluation timed out. Please try again or use a smaller search radius.`,
+          HttpStatus.REQUEST_TIMEOUT,
+        );
+      }
+      
       throw new HttpException(
         `AI evaluation failed: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -43,7 +60,15 @@ export class GeminiService {
     try {
       console.log('🎯 GEMINI: Starting evaluation with data-driven baseline scores');
       const prompt = this.createEvaluationPrompt(locationData, areaCharacteristics, baselineScores);
-      const result = await this.model.generateContent(prompt);
+      
+      // Add timeout for Gemini API call
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Gemini API timeout after 2 minutes')), 120000);
+      });
+      
+      const geminiPromise = this.model.generateContent(prompt);
+      
+      const result = await Promise.race([geminiPromise, timeoutPromise]);
       const response = await result.response;
       const text = response.text();
 
@@ -57,6 +82,15 @@ export class GeminiService {
       return aiAnalysis;
     } catch (error) {
       console.error('Gemini baseline evaluation failed:', error);
+      
+      // Handle timeout specifically
+      if (error.message.includes('timeout')) {
+        throw new HttpException(
+          `AI evaluation timed out. Please try again or use a smaller search radius.`,
+          HttpStatus.REQUEST_TIMEOUT,
+        );
+      }
+      
       throw new HttpException(
         `AI baseline evaluation failed: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
