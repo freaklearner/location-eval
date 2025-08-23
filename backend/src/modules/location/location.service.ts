@@ -57,12 +57,29 @@ export class LocationService {
   private loadEvaluationConfig() {
     try {
       const configPath = path.join(__dirname, '../../config/evaluation.config.json');
+      console.log(`🔍 LocationService: Attempting to load config from: ${configPath}`);
+      
+      // Check if file exists
+      if (!fs.existsSync(configPath)) {
+        console.error(`❌ LocationService: Config file does not exist at: ${configPath}`);
+        try {
+          console.log('📁 LocationService: Directory contents:', fs.readdirSync(path.dirname(configPath)));
+        } catch (dirError) {
+          console.error('❌ LocationService: Cannot read directory:', dirError.message);
+        }
+        throw new Error(`Configuration file not found at ${configPath}`);
+      }
+      
       const configData = fs.readFileSync(configPath, 'utf8');
       this.evaluationConfig = JSON.parse(configData);
-      console.log('✅ Evaluation configuration loaded successfully');
+      console.log('✅ LocationService: Evaluation configuration loaded successfully');
+      console.log(`📊 LocationService: Loaded ${this.evaluationConfig.evaluationParameters?.length || 0} evaluation parameters`);
     } catch (error) {
-      console.error('❌ Failed to load evaluation configuration:', error);
+      console.error('❌ LocationService: Failed to load evaluation configuration:', error);
+      console.error('🔍 LocationService: Current working directory:', process.cwd());
+      console.error('🔍 LocationService: __dirname:', __dirname);
       // Fallback to default configuration
+      console.log('🔄 LocationService: Using default configuration as fallback');
       this.evaluationConfig = this.getDefaultConfig();
     }
   }

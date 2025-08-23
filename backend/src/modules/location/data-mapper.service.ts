@@ -55,10 +55,28 @@ export class DataMapperService {
   private loadEvaluationConfig() {
     try {
       const configPath = path.join(__dirname, '../../config/evaluation.config.json');
+      console.log(`🔍 DataMapperService: Attempting to load config from: ${configPath}`);
+      
+      // Check if file exists
+      if (!fs.existsSync(configPath)) {
+        console.error(`❌ DataMapperService: Config file does not exist at: ${configPath}`);
+        try {
+          console.log('📁 DataMapperService: Directory contents:', fs.readdirSync(path.dirname(configPath)));
+        } catch (dirError) {
+          console.error('❌ DataMapperService: Cannot read directory:', dirError.message);
+        }
+        throw new Error(`Configuration file not found at ${configPath}`);
+      }
+      
       const configData = fs.readFileSync(configPath, 'utf8');
       this.evaluationConfig = JSON.parse(configData);
+      console.log('✅ DataMapperService: Evaluation configuration loaded successfully');
+      console.log(`📊 DataMapperService: Loaded ${this.evaluationConfig.evaluationParameters?.length || 0} evaluation parameters`);
     } catch (error) {
-      console.error('❌ Failed to load evaluation configuration:', error);
+      console.error('❌ DataMapperService: Failed to load evaluation configuration:', error);
+      console.error('🔍 DataMapperService: Current working directory:', process.cwd());
+      console.error('🔍 DataMapperService: __dirname:', __dirname);
+      console.log('🔄 DataMapperService: Using empty configuration as fallback');
       this.evaluationConfig = { evaluationParameters: [] };
     }
   }

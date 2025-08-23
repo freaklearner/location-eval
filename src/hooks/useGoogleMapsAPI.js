@@ -5,7 +5,7 @@ const BASE_URL = 'https://maps.googleapis.com/maps/api/place';
 
 // Note: Direct API calls from frontend will face CORS issues
 // In production, these calls should be made from a backend server
-const DEMO_MODE = false; // Set to false when backend is available
+// DEMO_MODE REMOVED - Application will only work with live backend or fail with proper error
 
 const useGoogleMapsAPI = () => {
   const [loading, setLoading] = useState(false);
@@ -180,50 +180,38 @@ const useGoogleMapsAPI = () => {
 
   // Find nearby businesses by type
   const findNearbyBusinesses = useCallback(async (lat, lng, type, radius = 1000) => {
-    if (DEMO_MODE) {
-      await delay(300);
-      return { results: [] };
-    }
-
+    console.log(`🔍 Searching for ${type} near ${lat},${lng} within ${radius}m`);
     const url = `${BASE_URL}/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${type}&key=${GOOGLE_MAPS_API_KEY}`;
-    return await makeAPICall(url);
+    const result = await makeAPICall(url);
+    console.log(`✅ Found ${result?.results?.length || 0} ${type} locations`);
+    return result;
   }, [makeAPICall]);
 
   // Search for specific brands or keywords
   const searchByText = useCallback(async (lat, lng, query, radius = 1000) => {
-    if (DEMO_MODE) {
-      await delay(300);
-      return { results: [] };
-    }
-
+    console.log(`🏷️ Searching for "${query}" near ${lat},${lng} within ${radius}m`);
     const url = `${BASE_URL}/textsearch/json?query=${encodeURIComponent(query)}&location=${lat},${lng}&radius=${radius}&key=${GOOGLE_MAPS_API_KEY}`;
-    return await makeAPICall(url);
+    const result = await makeAPICall(url);
+    console.log(`✅ Found ${result?.results?.length || 0} "${query}" locations`);
+    return result;
   }, [makeAPICall]);
 
   // Get place details
   const getPlaceDetails = useCallback(async (placeId) => {
-    if (DEMO_MODE) {
-      await delay(200);
-      return { result: { name: "Demo Place", rating: 4.0 } };
-    }
-
+    console.log(`📍 Getting details for place: ${placeId}`);
     const url = `${BASE_URL}/details/json?place_id=${placeId}&fields=name,rating,price_level,types,vicinity,user_ratings_total&key=${GOOGLE_MAPS_API_KEY}`;
-    return await makeAPICall(url);
+    const result = await makeAPICall(url);
+    console.log(`✅ Retrieved details for: ${result?.result?.name || 'Unknown'}`);
+    return result;
   }, [makeAPICall]);
 
   // Get location info from coordinates
   const getLocationInfo = useCallback(async (lat, lng) => {
-    if (DEMO_MODE) {
-      await delay(500);
-      return {
-        results: [{
-          formatted_address: `Demo Location near ${lat.toFixed(4)}, ${lng.toFixed(4)}`
-        }]
-      };
-    }
-
+    console.log(`🗺️ Getting location info for coordinates: ${lat},${lng}`);
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_MAPS_API_KEY}`;
-    return await makeAPICall(url);
+    const result = await makeAPICall(url);
+    console.log(`✅ Retrieved location: ${result?.results?.[0]?.formatted_address || 'Unknown'}`);
+    return result;
   }, [makeAPICall]);
 
   // Comprehensive location analysis
@@ -240,17 +228,8 @@ const useGoogleMapsAPI = () => {
         rawData: {}
       };
 
-      if (DEMO_MODE) {
-        onProgress?.('🎯 Running in demo mode with sample data...');
-        await delay(1000);
-        
-        const demoData = generateDemoData(lat, lng, radius);
-        analysis.businesses = demoData.businesses;
-        analysis.brands = demoData.brands;
-        
-        onProgress?.('📊 Processing demo data...');
-        await delay(500);
-      } else {
+      // Always use live backend - no demo mode fallback
+      {
         const searchTypes = [
           { key: 'restaurants', type: 'restaurant' },
           { key: 'food', type: 'food' },
@@ -333,7 +312,7 @@ const useGoogleMapsAPI = () => {
     getLocationInfo,
     analyzeLocation,
     clearError: () => setError(null),
-    isDemoMode: DEMO_MODE
+    isDemoMode: false // Demo mode completely removed
   };
 };
 

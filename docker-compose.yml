@@ -20,9 +20,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    volumes:
-      # Mount logs directory (optional)
-      - ./logs:/app/logs
+    # volumes:
+      # Mount logs directory (optional) - commented out to avoid permission issues
+      # - ./logs:/app/logs
     networks:
       - app-network
 

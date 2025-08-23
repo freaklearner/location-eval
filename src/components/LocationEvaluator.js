@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import backendService from '../services/backendService';
-import demoService from '../services/demoService';
 import LocationInput from './LocationInput';
 import AnalysisProgress from './AnalysisProgress';
 import AnalysisResults from './AnalysisResults';
@@ -21,13 +20,15 @@ const LocationEvaluator = () => {
         console.log('🌐 Backend availability result:', isAvailable);
         setBackendAvailable(isAvailable);
         if (!isAvailable) {
-          console.warn('⚠️ Backend server not available, using demo mode');
+          console.error('❌ Backend server not available - Application requires live backend');
+          setError('Backend server is not available. Please ensure the backend service is running.');
         } else {
           console.log('✅ Backend server is available');
         }
       } catch (error) {
         console.error('❌ Failed to check backend availability:', error);
         setBackendAvailable(false);
+        setError(`Failed to connect to backend: ${error.message}`);
       }
     };
 
@@ -74,26 +75,8 @@ const LocationEvaluator = () => {
           source: 'backend'
         };
       } else {
-        console.log('⚠️ Using demo service (backend not available)');
-        // Fallback to demo mode
-        setProgressMessage('🎯 Running in demo mode...');
-        
-        const demoResults = await demoService.analyzeLocation(
-          coordinates,
-          locationInfo,
-          setProgressMessage
-        );
-
-        // Transform demo response to match expected format
-        finalResults = {
-          locationData: demoResults.locationAnalysis,
-          aiAnalysis: demoResults.aiEvaluation,
-          locationInfo: demoResults.locationInfo,
-          areaCharacteristics: demoResults.areaCharacteristics,
-          timestamp: demoResults.timestamp,
-          coordinates: demoResults.coordinates,
-          source: 'demo'
-        };
+        console.error('❌ Backend not available - Cannot perform analysis');
+        throw new Error('Backend server is not available. Analysis requires live backend connection.');
       }
 
       setAnalysisResults(finalResults);
