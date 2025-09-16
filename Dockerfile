@@ -56,7 +56,9 @@ COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/dist ./backend/di
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/node_modules ./backend/node_modules
 COPY --from=backend-builder --chown=nodejs:nodejs /app/backend/package.json ./backend/package.json
 
-# Config files are already included in the dist directory from the build stage
+# Copy config files to BOTH src and dist directories to ensure they're found
+COPY --chown=nodejs:nodejs backend/src/config/ ./backend/src/config/
+COPY --chown=nodejs:nodejs backend/src/config/ ./backend/dist/config/
 
 # Copy frontend build
 COPY --from=frontend-builder --chown=nodejs:nodejs /app/frontend/build ./frontend/build
