@@ -20,95 +20,59 @@ let LocationController = class LocationController {
         this.locationService = locationService;
     }
     async analyzeLocation(body) {
-        const { lat, lng, radius } = body;
-        if (!lat || !lng) {
-            throw new common_1.HttpException('Latitude and longitude are required', common_1.HttpStatus.BAD_REQUEST);
-        }
-        if (lat < -90 || lat > 90) {
-            throw new common_1.HttpException('Latitude must be between -90 and 90', common_1.HttpStatus.BAD_REQUEST);
-        }
-        if (lng < -180 || lng > 180) {
-            throw new common_1.HttpException('Longitude must be between -180 and 180', common_1.HttpStatus.BAD_REQUEST);
-        }
-        if (radius && (radius < 100 || radius > 5000)) {
-            throw new common_1.HttpException('Radius must be between 100 and 5000 meters', common_1.HttpStatus.BAD_REQUEST);
+        const { lat, lng, radius = 800, format } = body;
+        const locationData = { lat, lng, radius, format };
+        const validation = this.locationService.validateLocationData(locationData);
+        if (!validation.valid) {
+            throw new common_1.HttpException(`Invalid input: ${validation.errors.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
         }
         try {
-            const result = await this.locationService.analyzeLocation({
-                lat,
-                lng,
-                radius: radius || 1000,
-            });
+            console.log(`🎯 Analyzing location: ${lat}, ${lng} (radius: ${radius}m, format: ${format || 'default'})`);
+            const result = await this.locationService.evaluateLocation(locationData);
             return {
                 success: true,
-                data: result,
-                message: 'Location analyzed successfully',
+                location: { lat, lng, radius, format },
+                evaluation: result,
+                timestamp: new Date().toISOString()
             };
         }
         catch (error) {
-            throw new common_1.HttpException(error.message || 'Failed to analyze location', error.status || common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            console.error('❌ Location analysis failed:', error.message);
+            throw new common_1.HttpException(`Location analysis failed: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    async findNearbyBusinesses(body) {
-        const { lat, lng, type, radius } = body;
-        if (!lat || !lng || !type) {
-            throw new common_1.HttpException('Latitude, longitude, and type are required', common_1.HttpStatus.BAD_REQUEST);
-        }
+    async getConfiguration() {
         try {
-            const result = await this.locationService.findNearbyBusinesses(lat, lng, type, radius || 1000);
+            const config = this.locationService.getEvaluationConfig();
             return {
                 success: true,
-                data: result,
-                message: 'Nearby businesses found successfully',
+                configuration: {
+                    framework: config.evaluationFramework,
+                    parameters: config.evaluationParameters.length,
+                    formats: Object.keys(config.formatBasedWeights || {}),
+                    version: config.evaluationFramework.version
+                }
             };
         }
         catch (error) {
-            throw new common_1.HttpException(error.message || 'Failed to find nearby businesses', error.status || common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException('Failed to retrieve configuration', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    async searchByText(body) {
-        const { lat, lng, query, radius } = body;
-        if (!lat || !lng || !query) {
-            throw new common_1.HttpException('Latitude, longitude, and query are required', common_1.HttpStatus.BAD_REQUEST);
-        }
-        try {
-            const result = await this.locationService.searchByText(lat, lng, query, radius || 1000);
-            return {
-                success: true,
-                data: result,
-                message: 'Text search completed successfully',
-            };
-        }
-        catch (error) {
-            throw new common_1.HttpException(error.message || 'Failed to perform text search', error.status || common_1.HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-    async getLocationInfo(lat, lng) {
-        if (!lat || !lng) {
-            throw new common_1.HttpException('Latitude and longitude are required', common_1.HttpStatus.BAD_REQUEST);
-        }
-        const latitude = parseFloat(lat);
-        const longitude = parseFloat(lng);
-        if (isNaN(latitude) || isNaN(longitude)) {
-            throw new common_1.HttpException('Invalid latitude or longitude', common_1.HttpStatus.BAD_REQUEST);
-        }
-        try {
-            const result = await this.locationService.getLocationInfo(latitude, longitude);
-            return {
-                success: true,
-                data: result,
-                message: 'Location info retrieved successfully',
-            };
-        }
-        catch (error) {
-            throw new common_1.HttpException(error.message || 'Failed to get location info', error.status || common_1.HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    async validateInput(body) {
+        const locationData = { lat: body.lat, lng: body.lng, radius: body.radius, format: body.format };
+        const validation = this.locationService.validateLocationData(locationData);
+        return {
+            valid: validation.valid,
+            errors: validation.errors,
+            timestamp: new Date().toISOString()
+        };
     }
     async healthCheck() {
         return {
-            success: true,
-            message: 'Location service is healthy',
-            timestamp: new Date().toISOString(),
+            status: 'healthy',
+            service: 'Location Service v2.0',
+            framework: '7-Step Slab-Based Evaluation',
+            timestamp: new Date().toISOString()
         };
     }
 };
@@ -121,27 +85,18 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], LocationController.prototype, "analyzeLocation", null);
 __decorate([
-    (0, common_1.Post)('nearby-businesses'),
+    (0, common_1.Get)('config'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], LocationController.prototype, "getConfiguration", null);
+__decorate([
+    (0, common_1.Post)('validate'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], LocationController.prototype, "findNearbyBusinesses", null);
-__decorate([
-    (0, common_1.Post)('text-search'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], LocationController.prototype, "searchByText", null);
-__decorate([
-    (0, common_1.Get)('info'),
-    __param(0, (0, common_1.Query)('lat')),
-    __param(1, (0, common_1.Query)('lng')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], LocationController.prototype, "getLocationInfo", null);
+], LocationController.prototype, "validateInput", null);
 __decorate([
     (0, common_1.Get)('health'),
     __metadata("design:type", Function),

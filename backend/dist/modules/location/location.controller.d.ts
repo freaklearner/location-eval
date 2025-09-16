@@ -1,47 +1,47 @@
-import { LocationService } from './location.service';
+import { LocationService, EvaluationResult } from './location.service';
 interface AnalyzeLocationDto {
     lat: number;
     lng: number;
     radius?: number;
-}
-interface NearbyBusinessesDto {
-    lat: number;
-    lng: number;
-    type: string;
-    radius?: number;
-}
-interface TextSearchDto {
-    lat: number;
-    lng: number;
-    query: string;
-    radius?: number;
+    format?: 'cart' | 'cloud_kitchen' | 'cafe_premium';
 }
 export declare class LocationController {
     private readonly locationService;
     constructor(locationService: LocationService);
     analyzeLocation(body: AnalyzeLocationDto): Promise<{
         success: boolean;
-        data: any;
-        message: string;
+        location: {
+            lat: number;
+            lng: number;
+            radius: number;
+            format: "cart" | "cloud_kitchen" | "cafe_premium";
+        };
+        evaluation: EvaluationResult;
+        timestamp: string;
     }>;
-    findNearbyBusinesses(body: NearbyBusinessesDto): Promise<{
+    getConfiguration(): Promise<{
         success: boolean;
-        data: import("./location.service").BusinessSearchResult;
-        message: string;
+        configuration: {
+            framework: any;
+            parameters: any;
+            formats: string[];
+            version: any;
+        };
     }>;
-    searchByText(body: TextSearchDto): Promise<{
-        success: boolean;
-        data: import("./location.service").BusinessSearchResult;
-        message: string;
-    }>;
-    getLocationInfo(lat: string, lng: string): Promise<{
-        success: boolean;
-        data: any;
-        message: string;
+    validateInput(body: {
+        lat: number;
+        lng: number;
+        radius?: number;
+        format?: string;
+    }): Promise<{
+        valid: boolean;
+        errors: string[];
+        timestamp: string;
     }>;
     healthCheck(): Promise<{
-        success: boolean;
-        message: string;
+        status: string;
+        service: string;
+        framework: string;
         timestamp: string;
     }>;
 }

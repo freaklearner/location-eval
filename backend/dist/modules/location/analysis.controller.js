@@ -15,142 +15,106 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AnalysisController = void 0;
 const common_1 = require("@nestjs/common");
 const location_service_1 = require("./location.service");
-const gemini_service_1 = require("../gemini/gemini.service");
 let AnalysisController = class AnalysisController {
-    constructor(locationService, geminiService) {
+    constructor(locationService) {
         this.locationService = locationService;
-        this.geminiService = geminiService;
     }
     async completeAnalysis(body) {
-        const { lat, lng, radius, clientName, address } = body;
-        if (!lat || !lng) {
-            throw new common_1.HttpException('Latitude and longitude are required', common_1.HttpStatus.BAD_REQUEST);
-        }
-        if (lat < -90 || lat > 90) {
-            throw new common_1.HttpException('Latitude must be between -90 and 90', common_1.HttpStatus.BAD_REQUEST);
-        }
-        if (lng < -180 || lng > 180) {
-            throw new common_1.HttpException('Longitude must be between -180 and 180', common_1.HttpStatus.BAD_REQUEST);
+        const { lat, lng, radius = 800, format, clientName, address } = body;
+        const locationData = { lat, lng, radius, format };
+        const validation = this.locationService.validateLocationData(locationData);
+        if (!validation.valid) {
+            throw new common_1.HttpException(`Invalid location data: ${validation.errors.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
         }
         try {
-            const locationInfo = await this.locationService.getLocationInfo(lat, lng);
-            const locationDetails = this.extractLocationDetails(locationInfo);
-            const locationAnalysis = await this.locationService.analyzeLocation({
-                lat,
-                lng,
-                radius: radius || 1000,
-            });
-            const areaCharacteristics = this.extractAreaCharacteristics(locationAnalysis);
-            const aiEvaluation = await this.geminiService.evaluateLocation({
-                locationData: locationAnalysis,
-                areaCharacteristics,
-            });
+            console.log(`🎯 Starting complete analysis for ${lat}, ${lng} (radius: ${radius}m, format: ${format || 'default'})`);
+            const evaluationResult = await this.locationService.evaluateLocation(locationData);
+            const response = {
+                success: true,
+                timestamp: new Date().toISOString(),
+                location: {
+                    coordinates: { lat, lng },
+                    radius,
+                    format: format || 'default',
+                    clientName: clientName || null,
+                    address: address || evaluationResult.locationDetails?.formattedAddress || null,
+                    city: evaluationResult.locationDetails?.city || 'Unknown',
+                    state: evaluationResult.locationDetails?.state || 'Unknown',
+                    country: evaluationResult.locationDetails?.country || 'Unknown',
+                    postalCode: evaluationResult.locationDetails?.postalCode || null
+                },
+                evaluation: {
+                    overall: {
+                        percentage: evaluationResult.percentage,
+                        grade: evaluationResult.grade,
+                        confidence: evaluationResult.confidence,
+                        totalScore: evaluationResult.totalScore
+                    },
+                    parameters: evaluationResult.parameters.map(param => ({
+                        id: param.id,
+                        name: param.name,
+                        slab: param.slab,
+                        score: param.score,
+                        weight: param.weight,
+                        confidence: param.confidence,
+                        reason: param.reason,
+                        indicators: param.indicators
+                    })),
+                    formatAdjustments: evaluationResult.formatAdjustments,
+                    recommendations: evaluationResult.recommendations
+                },
+                methodology: {
+                    framework: '7-Step Slab-Based Evaluation',
+                    version: '2.0',
+                    totalParameters: evaluationResult.parameters.length,
+                    slabSystem: 'Budget(1) → Entry(2) → Mid(3) → Premium(4) → Luxury(5)'
+                }
+            };
+            console.log(`✅ Analysis completed: ${evaluationResult.percentage}% (Grade ${evaluationResult.grade})`);
+            return response;
+        }
+        catch (error) {
+            console.error('❌ Analysis failed:', error.message);
+            throw new common_1.HttpException(`Analysis failed: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    async getEvaluationConfig() {
+        try {
+            const config = this.locationService.getEvaluationConfig();
             return {
                 success: true,
-                data: {
-                    coordinates: { lat, lng, radius: radius || 1000 },
-                    locationInfo: locationDetails,
-                    locationAnalysis,
-                    areaCharacteristics,
-                    aiEvaluation,
-                    clientInfo: {
-                        name: clientName || 'Unknown Client',
-                        providedAddress: address || 'Not provided',
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-                message: 'Complete location analysis finished successfully',
+                config: {
+                    framework: config.evaluationFramework,
+                    parameters: config.evaluationParameters.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        description: p.description,
+                        weight: p.weight,
+                        category: p.category
+                    })),
+                    formatOptions: Object.keys(config.formatBasedWeights || {}),
+                    slabSystem: config.evaluationFramework.slabSystem
+                }
             };
         }
         catch (error) {
-            console.error('Complete analysis failed:', error);
-            throw new common_1.HttpException(`Analysis failed: ${error.message}`, error.status || common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new common_1.HttpException('Failed to load configuration', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    extractLocationDetails(geocodeResponse) {
-        if (!geocodeResponse || !geocodeResponse.results || geocodeResponse.results.length === 0) {
-            return {
-                formattedAddress: 'Unknown Location',
-                city: 'Unknown',
-                state: 'Unknown',
-                country: 'Unknown',
-                postalCode: 'Unknown',
-                neighborhood: 'Unknown',
-                addressComponents: []
-            };
-        }
-        const result = geocodeResponse.results[0];
-        const components = result.address_components || [];
-        let city = 'Unknown';
-        let state = 'Unknown';
-        let country = 'Unknown';
-        let postalCode = 'Unknown';
-        let neighborhood = 'Unknown';
-        components.forEach((component) => {
-            const types = component.types || [];
-            if (types.includes('locality')) {
-                city = component.long_name;
-            }
-            else if (types.includes('administrative_area_level_1')) {
-                state = component.long_name;
-            }
-            else if (types.includes('country')) {
-                country = component.long_name;
-            }
-            else if (types.includes('postal_code')) {
-                postalCode = component.long_name;
-            }
-            else if (types.includes('neighborhood') || types.includes('sublocality')) {
-                neighborhood = component.long_name;
-            }
-        });
+    async validateLocation(body) {
+        const locationData = { lat: body.lat, lng: body.lng, radius: body.radius, format: body.format };
+        const validation = this.locationService.validateLocationData(locationData);
         return {
-            formattedAddress: result.formatted_address || 'Unknown Location',
-            city,
-            state,
-            country,
-            postalCode,
-            neighborhood,
-            addressComponents: components,
-            placeId: result.place_id,
-            geometry: result.geometry
-        };
-    }
-    extractAreaCharacteristics(locationAnalysis) {
-        const { businesses = {}, summary = {} } = locationAnalysis;
-        return {
-            food_competition: {
-                total_restaurants: (businesses.restaurants?.length || 0) + (businesses.food?.length || 0),
-                average_rating: summary.restaurants?.averageRating || 0,
-                high_rated_restaurants: summary.restaurants?.highRatedCount || 0,
-                popular_restaurants: summary.restaurants?.popularPlaces || 0,
-            },
-            commercial_activity: {
-                total_businesses: summary.overall?.totalBusinesses || 0,
-                shopping_options: businesses.shopping_malls?.length || 0,
-                clothing_stores: 0,
-            },
-            demographics: {
-                educational_institutions: (businesses.schools?.length || 0) + (businesses.universities?.length || 0),
-                healthcare_facilities: businesses.hospitals?.length || 0,
-                fitness_facilities: businesses.gyms?.length || 0,
-                entertainment_options: 0,
-            },
-            infrastructure: {
-                petrol_stations: businesses.gas_stations?.length || 0,
-                accessibility_score: Math.min(10, Math.floor((summary.overall?.totalBusinesses || 0) / 10)),
-            },
+            valid: validation.valid,
+            errors: validation.errors
         };
     }
     async healthCheck() {
         return {
-            success: true,
-            message: 'Analysis service is healthy',
-            services: {
-                location: 'Available',
-                gemini: 'Available',
-            },
-            timestamp: new Date().toISOString(),
+            status: 'healthy',
+            service: 'Location Evaluation Tool v2.0',
+            framework: '7-Step Slab-Based Evaluation',
+            timestamp: new Date().toISOString()
         };
     }
 };
@@ -163,6 +127,19 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AnalysisController.prototype, "completeAnalysis", null);
 __decorate([
+    (0, common_1.Get)('config'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AnalysisController.prototype, "getEvaluationConfig", null);
+__decorate([
+    (0, common_1.Post)('validate'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AnalysisController.prototype, "validateLocation", null);
+__decorate([
     (0, common_1.Get)('health'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -170,7 +147,6 @@ __decorate([
 ], AnalysisController.prototype, "healthCheck", null);
 exports.AnalysisController = AnalysisController = __decorate([
     (0, common_1.Controller)('analysis'),
-    __metadata("design:paramtypes", [location_service_1.LocationService,
-        gemini_service_1.GeminiService])
+    __metadata("design:paramtypes", [location_service_1.LocationService])
 ], AnalysisController);
 //# sourceMappingURL=analysis.controller.js.map

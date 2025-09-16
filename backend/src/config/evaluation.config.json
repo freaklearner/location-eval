@@ -1,623 +1,595 @@
 {
+  "evaluationFramework": {
+    "version": "2.0",
+    "description": "New 7-step framework with 5-slab scoring system for location evaluation",
+    "maxScore": 100,
+    "slabSystem": {
+      "1": { "name": "Budget/Mass", "range": [0, 20], "description": "Budget/street-heavy catchment" },
+      "2": { "name": "Entry-level", "range": [21, 40], "description": "Basic organized presence" },
+      "3": { "name": "Mid-market", "range": [41, 60], "description": "Balanced mid catchment" },
+      "4": { "name": "Premium", "range": [61, 80], "description": "Premium organized hub" },
+      "5": { "name": "Luxury/Elite", "range": [81, 100], "description": "Luxury/elite destination" }
+    }
+  },
   "evaluationParameters": [
-    {
-      "id": "food_brand_presence",
-      "name": "Food Brand Presence",
-      "description": "Premium food brands nearby indicating spending capacity",
-      "weight": 4,
-      "maxScore": 5,
-      "category": "high_priority",
-      "brands": [
-        "McDonald's", "KFC", "Domino's", "Pizza Hut", "Subway",
-        "Burger King", "Starbucks", "Costa Coffee", "Cafe Coffee Day",
-        "Haldiram's", "Bikanervala", "Sagar Ratna", "Wow! Momo",
-        "Faasos", "Box8", "Behrouz Biryani", "Oven Story Pizza"
-      ]
-    },
-    {
-      "id": "clothing_brand_presence", 
-      "name": "Clothing Brand Presence",
-      "description": "Market sophistication indicator through fashion brands",
-      "weight": 2,
-      "maxScore": 5,
-      "category": "medium_priority",
-      "brands": [
-        "H&M", "Zara", "Uniqlo", "Reliance Trends", "Max Fashion", 
-        "Lifestyle", "Shoppers Stop", "Pantaloons", "Central", "Westside",
-        "Raymond", "Titan", "Lenskart", "Crossword"
-      ]
-    },
-    {
-      "id": "footwear_brand_presence",
-      "name": "Footwear Brand Presence", 
-      "description": "Consumer spending patterns through shoe brands",
-      "weight": 2,
-      "maxScore": 5,
-      "category": "medium_priority",
-      "brands": [
-        "Nike", "Adidas", "Puma", "Reebok", "Bata", "Liberty Shoes", 
-        "Red Tape", "Woodland", "Sketchers", "Metro Shoes", "Inc.5", "Mochi"
-      ]
-    },
-    {
-      "id": "nearby_colleges_universities",
-      "name": "Nearby Colleges/Universities",
-      "description": "Target demographic proximity - college students and young adults",
-      "weight": 4,
-      "maxScore": 5,
-      "category": "high_priority",
-      "searchTypes": ["university", "college"]
-    },
     {
       "id": "petrol_pump_nearby",
       "name": "Petrol Pump Nearby",
-      "description": "Convenience and accessibility indicator",
+      "description": "Quality of nearby petrol pumps as footfall indicators",
+      "weight": 1,
+      "category": "supportive",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["gas_station"],
+        "keywords": ["petrol pump", "fuel station", "Indian Oil", "HP", "BPCL", "Reliance", "Shell", "Nayara"]
+      },
+      "slabCriteria": {
+        "1": { "description": "Small local pump, 1-2 bays, no add-ons, URT <50", "indicators": ["basic pump", "no convenience store", "limited hours"] },
+        "2": { "description": "Normal PSU pump, limited bays, basic facilities", "indicators": ["Indian Oil/HP/BPCL", "basic air/washroom"] },
+        "3": { "description": "Standard organized pump, multiple bays, URT ~100-200", "indicators": ["multiple bays", "ATM", "car wash", "24x7"] },
+        "4": { "description": "Premium pump hub with convenience store + F&B", "indicators": ["Shell/Reliance/Nayara", "convenience store", "clean washrooms", "URT ≥200"] },
+        "5": { "description": "Destination pump complex with McDonald's/KFC + services", "indicators": ["mega pump", "McDonald's/KFC/Subway", "service station", "URT ≥500"] }
+      }
+    },
+    {
+      "id": "food_brand_presence",
+      "name": "Food Brand Presence",
+      "description": "Quality and tier of food brands indicating catchment maturity",
+      "weight": 5,
+      "category": "high_priority",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["restaurant", "cafe", "fast_food", "meal_takeaway", "meal_delivery", "bakery", "food_court"],
+        "keywords": {
+          "global_qsr": ["McDonald's", "Burger King", "KFC", "Pizza Hut", "Domino's", "Papa John's", "Subway", "Starbucks", "Costa", "Dunkin Donuts"],
+          "indian_national": ["Wow! Momo", "Biryani Blues", "Behrouz Biryani", "Faasos", "Box8", "Oven Story", "Sagar Ratna", "Haldiram's", "CCD", "Chaayos"],
+          "regional": ["Nirula's", "Karim's", "Paradise Biryani", "Truffles", "Empire", "Natural Ice Cream"],
+          "local_street": ["momo stall", "chaat corner", "rolls", "dhaba", "snack corner"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "90%+ outlets local, no branded chains", "weightage": { "global_qsr": 0, "indian_national": 0, "regional": 0, "local_street": 100 } },
+        "2": { "description": "1-2 regional chains, mostly local, no global/national QSR", "weightage": { "global_qsr": 0, "indian_national": 10, "regional": 20, "local_street": 70 } },
+        "3": { "description": "2-3 national chains or 4+ regional, local strong", "weightage": { "global_qsr": 10, "indian_national": 30, "regional": 30, "local_street": 30 } },
+        "4": { "description": "3-4 global QSR + 4+ national chains", "weightage": { "global_qsr": 40, "indian_national": 40, "regional": 15, "local_street": 5 } },
+        "5": { "description": "Multiple global QSR (≥5) + multiple national chains", "weightage": { "global_qsr": 60, "indian_national": 30, "regional": 8, "local_street": 2 } }
+      }
+    },
+    {
+      "id": "clothing_brand_presence",
+      "name": "Clothing Brand Presence",
+      "description": "Clothing retail maturity indicating spending capacity",
+      "weight": 3,
+      "category": "medium_priority",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["clothing_store", "department_store", "shopping_mall", "store"],
+        "keywords": {
+          "luxury": ["Louis Vuitton", "Gucci", "Dior", "Chanel", "Hermès", "Prada", "Burberry", "Armani"],
+          "premium": ["Zara", "H&M", "Uniqlo", "Massimo Dutti", "Mango", "Marks & Spencer", "Tommy Hilfiger", "Calvin Klein"],
+          "national": ["Lifestyle", "Westside", "Shoppers Stop", "Pantaloons", "Raymond", "Van Heusen", "Levi's", "Fabindia"],
+          "value": ["Zudio", "Reliance Trends", "Max Fashion", "Easybuy", "V-Mart"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Value chains + local boutiques, no anchors/intl", "indicators": ["local boutiques", "no branded chains", "low URT"] },
+        "2": { "description": "Zudio/Max/Trends present, single anchor possible", "indicators": ["value chains", "single anchor", "no intl fast fashion"] },
+        "3": { "description": "2+ anchors, denim/formal brands cluster", "indicators": ["Lifestyle/Westside", "denim brands", "limited intl"] },
+        "4": { "description": "Zara/H&M/Uniqlo ≥1, anchors ≥2", "indicators": ["intl fast fashion", "multiple anchors", "URT↑"] },
+        "5": { "description": "1-2+ luxury mono-brands + intl fast fashion 2+", "indicators": ["luxury brands", "premium mall corridor", "high URT"] }
+      }
+    },
+    {
+      "id": "footwear_brand_presence",
+      "name": "Footwear Brand Presence",
+      "description": "Footwear retail indicating affluence and shopping behavior",
       "weight": 2,
-      "maxScore": 5,
-      "category": "lower_priority",
-      "searchTypes": ["gas_station"]
+      "category": "medium_priority",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["shoe_store", "store", "shopping_mall"],
+        "keywords": {
+          "luxury": ["Christian Louboutin", "Jimmy Choo", "Salvatore Ferragamo", "Tod's", "Bally"],
+          "premium": ["Nike", "Adidas", "Puma", "New Balance", "Aldo", "Steve Madden", "Clarks"],
+          "mid": ["Metro Shoes", "Mochi", "Regal", "Bata", "Red Tape", "Liberty"],
+          "budget": ["Relaxo", "Paragon", "Campus", "Action"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Local/value brands dominate, discount/wholesale heavy", "indicators": ["budget brands", "wholesale", "low URT"] },
+        "2": { "description": "Bata/Liberty/Khadim's cluster, few mid MBO", "indicators": ["organized value", "no global sports"] },
+        "3": { "description": "Metro/Mochi + Hush Puppies/Clarks, some sports", "indicators": ["mid organized", "some sports brands"] },
+        "4": { "description": "Nike/Adidas/Puma + Aldo/Steve Madden", "indicators": ["global sports", "premium brands", "higher URT"] },
+        "5": { "description": "Louboutin/Jimmy Choo/Ferragamo present", "indicators": ["luxury footwear", "premium mall/high street"] }
+      }
+    },
+    {
+      "id": "nearby_schools_colleges",
+      "name": "Nearby Schools/Colleges",
+      "description": "Educational institutions indicating student footfall potential",
+      "weight": 7,
+      "category": "high_priority",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["school", "secondary_school", "primary_school", "university", "college", "library", "book_store", "training", "institute"],
+        "keywords": {
+          "premium_schools": ["DPS", "Ryan International", "GD Goenka", "Amity", "Pathways"],
+          "cbse_icse": ["St. Xavier's", "St. Mary's", "DAV", "Birla Vidya Niketan"],
+          "universities": ["Delhi University", "Amity University", "Symbiosis", "Christ", "IIT", "NIT"],
+          "coaching": ["Aakash", "Allen", "FIITJEE", "Byju's", "Career Launcher", "Resonance"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Only 1-2 small local schools, no college/coaching", "indicators": ["local schools", "URT <50", "basic facilities"] },
+        "2": { "description": "2-3 small schools + 1 coaching institute", "indicators": ["budget schools", "affordable fees", "basic facilities"] },
+        "3": { "description": "Mix of 2-3 reputed schools + 1-2 colleges OR 3-5 coaching", "indicators": ["reputed schools", "canteen", "hostel nearby"] },
+        "4": { "description": "≥3 reputed schools + 2 colleges/universities OR 5+ coaching", "indicators": ["strong education hub", "crowded with students", "URT ≥300"] },
+        "5": { "description": "University cluster OR famous coaching hub", "indicators": ["university cluster", "10+ coaching", "heavy student footfall"] }
+      }
     },
     {
       "id": "footfall",
       "name": "Footfall",
-      "description": "Critical customer traffic metric",
-      "weight": 5,
-      "maxScore": 5,
+      "description": "Overall pedestrian and customer traffic density",
+      "weight": 18,
       "category": "high_priority",
-      "calculatedFrom": ["total_businesses", "business_density", "weighted_business_score", "rating_multiplier"]
+      "searchRadius": [400, 800, 1200],
+      "calculationMethod": "composite",
+      "components": {
+        "digital_proxies": {
+          "weight": 40,
+          "indicators": ["google_reviews_count", "popular_times", "category_mix", "transport_access"]
+        },
+        "economic_proxies": {
+          "weight": 35,
+          "indicators": ["rent_per_sqft", "avg_ticket_size", "brand_presence"]
+        },
+        "physical_proxies": {
+          "weight": 25,
+          "indicators": ["vehicle_mix", "pedestrian_count", "weekly_bazaar", "mobile_tower_density"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "90% 2-wheelers, govt schools, reviews <50, rent <₹50/sqft", "indicators": ["mass footfall", "daily wage crowd", "low spending"] },
+        "2": { "description": "70% 2W, budget schools, reviews 50-200, rent ₹50-100/sqft", "indicators": ["budget footfall", "small town salaried", "shopkeepers"] },
+        "3": { "description": "50% 2W + 50% cars, CBSE schools, reviews 200-500", "indicators": ["mid market footfall", "middle-class families", "students"] },
+        "4": { "description": "Cars/SUVs dominate, premium schools, reviews 500-1000", "indicators": ["premium footfall", "upper middle class", "aspirational youth"] },
+        "5": { "description": "SUVs + luxury cars, elite schools, reviews >1000", "indicators": ["elite footfall", "affluent", "high spenders"] }
+      }
     },
     {
       "id": "target_audience_fit",
       "name": "Target Audience Fit",
-      "description": "Demographics alignment with target customers: college students, young professionals, young parents, hygiene-conscious foodies",
-      "weight": 5,
-      "maxScore": 5,
+      "description": "Alignment with target demographics (Students, Office, Families, Aspirational Youth)",
+      "weight": 10,
       "category": "high_priority",
-      "calculatedFrom": ["universities", "colleges", "offices", "commercial_activity", "family_establishments", "health_conscious_venues"]
+      "searchRadius": [400, 800, 1200],
+      "audienceSegments": {
+        "students_youth": {
+          "weight": 30,
+          "indicators": ["schools", "colleges", "coaching", "budget_cafes"],
+          "keywords": ["university", "college", "coaching center", "Chai Sutta", "MBA Chaiwala"]
+        },
+        "office_crowd": {
+          "weight": 30,
+          "indicators": ["offices", "coworking", "business_parks", "lunch_cafes"],
+          "keywords": ["IT Park", "Business Park", "co-working", "WeWork", "Awfis"]
+        },
+        "families": {
+          "weight": 20,
+          "indicators": ["apartments", "societies", "parks", "schools", "grocery"],
+          "keywords": ["apartment", "society", "township", "park", "supermarket"]
+        },
+        "aspirational_youth": {
+          "weight": 20,
+          "indicators": ["premium_cafes", "gyms", "malls", "bars"],
+          "keywords": ["Starbucks", "Blue Tokai", "premium gym", "Zara", "H&M"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "TAF <35, price_level 0-1, mostly local stalls", "range": [0, 35] },
+        "2": { "description": "TAF 35-50, some private schools/coaching", "range": [35, 50] },
+        "3": { "description": "TAF 50-65, students+offices visible", "range": [50, 65] },
+        "4": { "description": "TAF 65-80, co-working/IT hubs + premium cafés", "range": [65, 80] },
+        "5": { "description": "TAF 80+, premium cafés cluster, international schools", "range": [80, 100] }
+      }
     },
     {
       "id": "competition_pricing_momo",
-      "name": "Street Food Competition Analysis",
-      "description": "Competition analysis for Indian street food momos/dumplings market - balanced approach considering footfall benefits",
-      "weight": 5,
-      "maxScore": 5,
+      "name": "Competition Pricing (Momo)",
+      "description": "Momo competition analysis and pricing landscape",
+      "weight": 8,
       "category": "high_priority",
-      "searchQueries": ["momo", "dumpling", "momos", "street food", "chaat", "tibetan food", "steam momo", "fried momo", "wow momo", "momo king", "momo plaza"],
-      "competitionTypes": {
-        "direct": ["momo", "momos", "dumpling", "wow momo", "momo king", "momo plaza", "tibetan", "steamed momo", "fried momo", "veg momo", "chicken momo"],
-        "indirect": ["chaat", "samosa", "pakora", "roll", "sandwich", "burger", "pizza", "chinese", "fast food", "street food"]
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "keywords": ["momo", "momos", "dumpling", "restaurant", "cafe"],
+        "competition_types": {
+          "direct": ["momo", "momos", "dumpling", "wow momo", "tibetan", "steamed momo"],
+          "indirect": ["chaat", "samosa", "roll", "sandwich", "burger", "chinese", "fast food"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Price_level 0-1, avg momo plate ≤₹70-80", "indicators": ["budget pricing", "street carts", "daily-wage audience"] },
+        "2": { "description": "Price_level 1-2, momo plate ₹80-120", "indicators": ["entry-level organized", "local cloud kitchens", "reasonable pricing"] },
+        "3": { "description": "Price_level 2, momo plate ₹120-180", "indicators": ["mid-market pricing", "Wow! Momo", "branded kiosks"] },
+        "4": { "description": "Price_level 2-3, momo plate ₹180-250", "indicators": ["premium casual", "premium cafés", "good ambience"] },
+        "5": { "description": "Price_level 3-4, momo plate ₹250+", "indicators": ["elite pricing", "fine dining", "luxury hotels"] }
       }
     },
     {
       "id": "spending_capacity",
       "name": "Spending Capacity",
-      "description": "Local economic conditions and purchasing power",
-      "weight": 5,
-      "maxScore": 5,
+      "description": "Local spending power and economic indicators",
+      "weight": 12,
       "category": "high_priority",
-      "calculatedFrom": ["premium_brands", "average_ratings", "high_rated_places"]
+      "searchRadius": [400, 800, 1200],
+      "calculationMethod": "composite",
+      "indicators": {
+        "vehicle_mix": { "weight": 30, "description": "Car/SUV vs 2-wheeler ratio" },
+        "housing_quality": { "weight": 25, "description": "Society/apartment quality" },
+        "brand_presence": { "weight": 25, "description": "Premium vs budget brand mix" },
+        "price_levels": { "weight": 20, "description": "Average price_level of nearby businesses" }
+      },
+      "slabCriteria": {
+        "1": { "description": "90% 2W, basic housing, budget brands", "indicators": ["mass market", "low spending", "price sensitive"] },
+        "2": { "description": "70% 2W, small apartments, few mid brands", "indicators": ["lower middle class", "budget conscious"] },
+        "3": { "description": "50-50 2W/cars, gated societies, national brands", "indicators": ["middle class", "balanced spending"] },
+        "4": { "description": "Car/SUV majority, premium societies, intl brands", "indicators": ["upper middle class", "aspirational spending"] },
+        "5": { "description": "Luxury cars, high-end societies, luxury brands", "indicators": ["affluent", "high discretionary spending"] }
+      }
     },
     {
       "id": "nearby_businesses_offices",
       "name": "Nearby Businesses/Offices",
-      "description": "Commercial activity indicating office workers",
-      "weight": 4,
-      "maxScore": 5,
+      "description": "Office and business presence for lunch crowd and repeat customers",
+      "weight": 7,
       "category": "high_priority",
-      "searchTypes": ["establishment", "point_of_interest"]
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["office", "business_park", "coworking_space", "bank", "atm", "courier"],
+        "keywords": {
+          "it_parks": ["IT park", "technology park", "software park", "business park", "SEZ"],
+          "coworking": ["WeWork", "Awfis", "Regus", "Smartworks", "IndiQube", "91Springboard"],
+          "offices": ["corporate office", "head office", "regional office", "branch office"],
+          "support": ["bank", "ATM", "courier", "service center", "chartered accountant"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Almost no offices, few banks/ATMs, lunch cafés <3", "indicators": ["low office presence", "URT <50", "metro >12 min"] },
+        "2": { "description": "1 small office building or 1 minor coworking", "indicators": ["emerging office", "3-5 banks", "transit 10-15 min"] },
+        "3": { "description": "1 business/IT park or 2-3 coworking hubs", "indicators": ["stable office catchment", "5-8 lunch cafés", "transit ≤10 min"] },
+        "4": { "description": "2+ coworking hubs and/or 1 sizable business park", "indicators": ["strong office ecosystem", "8-12 lunch cafés", "transit ≤8 min"] },
+        "5": { "description": "Large Grade-A park/campus or multi-tower district", "indicators": ["prime corporate zone", "12+ cafés", "transit ≤6-8 min"] }
+      }
     },
     {
       "id": "vehicle_mix_mobility",
-      "name": "Vehicle Mix & Mobility",
-      "description": "Transportation patterns and accessibility",
-      "weight": 2,
-      "maxScore": 5,
-      "category": "lower_priority",
-      "searchTypes": ["bus_station", "subway_station", "taxi_stand"]
+      "name": "Vehicle Mix (Mobility)",
+      "description": "Vehicle composition indicating affluence and accessibility",
+      "weight": 3,
+      "category": "medium_priority",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["car_dealer", "motorcycle_dealer", "car_repair", "car_wash", "parking", "gas_station"],
+        "keywords": {
+          "two_wheeler": ["Hero", "Honda", "TVS", "Bajaj", "Suzuki", "Yamaha"],
+          "mass_4w": ["Maruti", "Hyundai", "Tata", "Kia", "Toyota"],
+          "premium_4w": ["Skoda", "VW", "Jeep", "MG", "Honda Cars"],
+          "luxury_4w": ["Mercedes", "BMW", "Audi", "Volvo", "Lexus", "Jaguar"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "VMI <30, no luxury dealers, share_2W ≥75%", "indicators": ["mass/2W-heavy", "informal parking"] },
+        "2": { "description": "VMI 30-45, ≥1 mass 4W dealer, share_car 25-45%", "indicators": ["low-mid mobility", "some cars"] },
+        "3": { "description": "VMI 45-65, ≥2 mass 4W dealers, balanced mix", "indicators": ["balanced mobility", "formal parking emerging"] },
+        "4": { "description": "VMI 65-80, ≥1 premium dealer, share_SUV ≥20%", "indicators": ["sedan/SUV-leaning", "formal parking"] },
+        "5": { "description": "VMI ≥80, ≥1 luxury dealer, share_SUV ≥30%", "indicators": ["affluent mobility", "luxury presence"] }
+      }
     },
     {
       "id": "residential_society_presence",
       "name": "Residential/Society Presence",
-      "description": "Customer base density from residential areas - reduced weight for street food destination-based business",
-      "weight": 3,
-      "maxScore": 5,
-      "category": "medium_priority",
-      "calculatedFrom": ["neighborhood_density", "residential_indicators"]
+      "description": "Quality and density of residential complexes for repeat customers",
+      "weight": 7,
+      "category": "high_priority",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["premise", "neighborhood", "political"],
+        "keywords": {
+          "budget": ["colony", "nagar", "gaon", "pura", "basti"],
+          "mid": ["apartments", "residency", "heights", "enclave"],
+          "premium": ["DLF", "Omaxe", "Godrej", "ATS", "Prestige", "Unitech", "Emaar"],
+          "luxury": ["golf course", "estate", "township", "country club", "villa"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Informal colonies, no branded societies, ratings <3.5", "indicators": ["jhuggis", "kaccha lanes", "2-3 floor informal"] },
+        "2": { "description": "Local colonies/enclaves, builder floors, ratings 3.5-3.8", "indicators": ["budget colonies", "3-4 floor walk-ups"] },
+        "3": { "description": "4-8 floor societies, small clubs, branded mid developers", "indicators": ["mid-rise organized", "gated but basic amenities"] },
+        "4": { "description": "High-rise towers, branded developers, full amenities", "indicators": ["premium gated", "clubhouse", "gym", "security"] },
+        "5": { "description": "Golf course facing, luxury villas, mega townships", "indicators": ["luxury townships", "premium amenities", "ratings >4.3"] }
+      }
     },
     {
       "id": "shopping_preferences_nearby",
       "name": "Shopping Preferences Nearby",
-      "description": "Consumer behavior indicators",
+      "description": "Retail sophistication and shopping behavior patterns",
       "weight": 3,
-      "maxScore": 5,
       "category": "medium_priority",
-      "searchTypes": ["shopping_mall", "store"],
-      "brands": [
-        "DMart", "Big Bazaar", "Reliance Fresh", "More", "Spencer's",
-        "Star Bazaar", "Easyday"
-      ]
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["shopping_mall", "clothing_store", "shoe_store", "department_store", "jewelry_store", "supermarket"],
+        "keywords": {
+          "budget": ["Vishal Mega Mart", "Easybuy", "Max", "factory outlet", "wholesale"],
+          "mid": ["Lifestyle", "Westside", "Pantaloons", "Levi's", "Metro Shoes"],
+          "premium": ["Zara", "H&M", "Uniqlo", "Marks & Spencer", "Nike", "Adidas"],
+          "luxury": ["Louis Vuitton", "Gucci", "Dior", "Burberry", "Rolex"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Shopping Index <30, no anchors, budget stores dominate", "indicators": ["bazaar/budget cluster", "median URT <100"] },
+        "2": { "description": "Index 30-44, 0-1 anchors, few branded mids", "indicators": ["organized budget", "no intl brands"] },
+        "3": { "description": "Index 45-64, 2+ anchors, 3-6 mid brands", "indicators": ["mid-market", "median URT 150-400"] },
+        "4": { "description": "Index 65-79, intl fast fashion ≥1", "indicators": ["premium high street", "median URT ≥400"] },
+        "5": { "description": "Index ≥80, luxury brands ≥1-2", "indicators": ["luxury retail node", "median URT ≥700"] }
+      }
     },
     {
       "id": "fitness_gym_walking_culture",
-      "name": "Fitness/Gym Culture",
-      "description": "Health-conscious demographics indicator",
-      "weight": 3,
-      "maxScore": 5,
+      "name": "Fitness/Gym/Walking Culture",
+      "description": "Health and fitness consciousness indicating lifestyle preferences",
+      "weight": 2,
       "category": "medium_priority",
-      "searchTypes": ["gym", "fitness_center"],
-      "brands": ["Gold's Gym", "Anytime Fitness", "Cult.fit", "Snap Fitness", "Talwalkars"]
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["gym", "fitness_center", "yoga", "park", "stadium", "spa", "swimming_pool"],
+        "keywords": {
+          "premium_gyms": ["Gold's Gym", "Cult.fit", "Anytime Fitness", "CrossFit", "F45"],
+          "wellness": ["Isha Yoga", "Art of Living", "VLCC", "O2 Spa"],
+          "outdoor": ["jogging track", "open gym", "walking park", "morning walk garden"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "No branded gyms, only 1-2 local gyms, no parks", "indicators": ["weak fitness culture", "basic gym", "no walking space"] },
+        "2": { "description": "3-5 local gyms, 1 small park, no premium brands", "indicators": ["budget fitness", "ratings <3.8"] },
+        "3": { "description": "1 branded gym OR multiple local gyms + parks", "indicators": ["balanced fitness", "1-2 parks with track"] },
+        "4": { "description": "≥2 branded gyms + yoga/pilates studios + large park", "indicators": ["strong fitness ecosystem", "ratings 4.0+"] },
+        "5": { "description": "Premium clusters: CrossFit, F45, luxury spas", "indicators": ["affluent wellness hub", "famous jogging parks"] }
+      }
     },
     {
       "id": "zomato_swiggy_delivery_density",
       "name": "Zomato/Swiggy Delivery Density",
-      "description": "Food delivery ecosystem strength",
-      "weight": 4,
-      "maxScore": 5,
+      "description": "Delivery ecosystem strength for online orders",
+      "weight": 15,
       "category": "high_priority",
-      "calculatedFrom": ["restaurant_density", "food_delivery_indicators"]
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["restaurant", "cafe", "bakery", "fast_food", "meal_takeaway", "meal_delivery"],
+        "keywords": {
+          "delivery_brands": ["Domino's", "Pizza Hut", "McDonald's", "KFC", "Subway", "Wow! Momo", "Faasos", "Behrouz"],
+          "cloud_kitchen": ["cloud kitchen", "dark kitchen", "ghost kitchen", "delivery kitchen"],
+          "delivery_keywords": ["delivery", "home delivery", "takeaway", "Swiggy", "Zomato", "packaging"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Index <30, D_count <10, few delivery mentions", "indicators": ["sparse delivery zone", "URT <120", "late-night ≤2"] },
+        "2": { "description": "Index 30-44, D_count 10-20, 1-2 national brands", "indicators": ["basic delivery availability", "modest demand"] },
+        "3": { "description": "Index 45-64, D_count 20-40, ≥2-3 national brands", "indicators": ["healthy delivery ecosystem", "lunch & dinner strong"] },
+        "4": { "description": "Index 65-79, D_count 40-60, ≥4 national brands", "indicators": ["dense delivery hub", "cloud kitchens ≥2", "late-night ≥5"] },
+        "5": { "description": "Index ≥80, D_count ≥60, cloud kitchen clusters ≥4", "indicators": ["prime delivery hotspot", "multiple high-URT nodes"] }
+      }
     },
     {
       "id": "student_vs_office_crowd_mix",
-      "name": "College Student vs Professional Mix",
-      "description": "Peak evening time analysis for street food - target demographic balance",
-      "weight": 3,
-      "maxScore": 5,
+      "name": "Student vs Office Crowd Mix",
+      "description": "Balance between student and office demographics",
+      "weight": 5,
       "category": "medium_priority",
-      "calculatedFrom": ["universities", "colleges", "offices", "commercial_establishments"]
+      "searchRadius": [400, 800, 1200],
+      "calculationMethod": "ratio_analysis",
+      "components": {
+        "student_indicators": ["schools", "colleges", "coaching", "libraries", "budget_cafes"],
+        "office_indicators": ["offices", "coworking", "business_parks", "lunch_cafes", "banks"]
+      },
+      "slabCriteria": {
+        "1": { "description": "Student-heavy (80%+), few offices", "indicators": ["college area", "budget cafes dominate", "evening crowd"] },
+        "2": { "description": "Student-dominant (60-80%), some offices", "indicators": ["mixed but student-leaning", "lunch + evening"] },
+        "3": { "description": "Balanced mix (40-60% each)", "indicators": ["healthy balance", "all-day footfall"] },
+        "4": { "description": "Office-dominant (60-80%), some students", "indicators": ["business district", "strong lunch crowd"] },
+        "5": { "description": "Office-heavy (80%+), premium corporate", "indicators": ["corporate zone", "premium lunch options"] }
+      }
     },
     {
       "id": "nightlife_cafe_presence",
-      "name": "Nightlife/Cafe Presence",
-      "description": "Evening activity and late-night food demand",
-      "weight": 3,
-      "maxScore": 5,
+      "name": "Nightlife/Café Presence",
+      "description": "Evening entertainment and café culture indicating aspirational demographics",
+      "weight": 4,
       "category": "medium_priority",
-      "searchTypes": ["night_club", "bar", "cafe"]
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["cafe", "bar", "night_club", "restaurant", "pub"],
+        "keywords": {
+          "premium_cafes": ["Starbucks", "Blue Tokai", "Third Wave", "Costa", "Gloria Jean's"],
+          "nightlife": ["Social", "The Beer Café", "Irish House", "Toit", "Hard Rock Café"],
+          "late_night": ["24x7", "midnight café", "late-night food", "DJ night", "live music"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "≤2 budget cafés, no pubs/bars", "indicators": ["no café/nightlife culture", "price_level ≤1.5"] },
+        "2": { "description": "3-5 local cafés, maybe 1 bar/pub", "indicators": ["small-town café presence", "mostly tea cafés"] },
+        "3": { "description": "1-2 premium cafés + 2-3 pubs/bars", "indicators": ["mid-market café + some nightlife", "open till ~11 pm"] },
+        "4": { "description": "≥3 premium cafés + ≥3 bars/pubs + 1 microbrewery", "indicators": ["premium café + strong nightlife", "late-night till ~1 am"] },
+        "5": { "description": "≥5 premium cafés + ≥5 pubs/clubs + luxury brands", "indicators": ["posh nightlife hub", "party till 3 am", "expensive drinks"] }
+      }
     },
     {
       "id": "local_events_weekly_bazaars",
       "name": "Local Events/Weekly Bazaars",
-      "description": "Periodic footfall boost opportunities",
+      "description": "Periodic events and markets creating footfall surges",
       "weight": 2,
-      "maxScore": 5,
-      "category": "lower_priority",
-      "calculatedFrom": ["community_activity", "event_venues"]
+      "category": "supportive",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "keywords": ["bazaar", "market", "fair", "mela", "weekly market", "haat", "sabzi mandi", "Sunday market", "night market"]
+      },
+      "slabCriteria": {
+        "1": { "description": "0-1 mentions, no weekly markets", "indicators": ["no bazaar culture", "only permanent shops"] },
+        "2": { "description": "1 monthly mela or small sabzi mandi", "indicators": ["occasional local event", "once in a while"] },
+        "3": { "description": "At least 1 recurring weekly bazaar, URT 100-300", "indicators": ["one strong weekly bazaar", "temporary stalls visible"] },
+        "4": { "description": "≥2 recurring bazaars OR 1 high-traffic landmark", "indicators": ["multiple weekly bazaars", "crowded", "heavy footfall"] },
+        "5": { "description": "Exhibition grounds + multiple events yearly", "indicators": ["city-level event hub", "festival mela", "URT >700"] }
+      }
     },
     {
       "id": "hospitals_clinics_nearby",
       "name": "Hospitals/Clinics Nearby",
-      "description": "Steady customer base from healthcare visitors",
+      "description": "Healthcare facilities indicating family demographics and steady footfall",
       "weight": 2,
-      "maxScore": 5,
-      "category": "lower_priority",
-      "searchTypes": ["hospital", "clinic", "doctor"]
+      "category": "supportive",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["hospital", "clinic", "doctor", "medical_clinic", "dentist", "pharmacy"],
+        "keywords": {
+          "tertiary": ["Apollo", "Fortis", "Max", "Manipal", "Medanta", "Aster"],
+          "mid_private": ["Shalby", "Sunshine", "Paras", "Wockhardt", "Cloudnine"],
+          "govt": ["Civil Hospital", "ESI Hospital", "District Hospital", "CGHS"]
+        }
+      },
+      "slabCriteria": {
+        "1": { "description": "Mostly govt PHC/CHC, no branded multi-speciality", "indicators": ["basic care zone", "URT <100", "basic OPD"] },
+        "2": { "description": "1-2 small private hospitals, limited diagnostics", "indicators": ["entry private + govt mix", "some cashless mentions"] },
+        "3": { "description": "1 mid multi-speciality OR 3-5 specialty clinics", "indicators": ["mid private ecosystem", "some ER/ICU", "ratings 3.8-4.1"] },
+        "4": { "description": "≥1 big branded hospital OR 2 strong mid", "indicators": ["premium private access", "ICU/ER 24x7", "URT 350-700"] },
+        "5": { "description": "≥2 branded tertiary hospitals OR flagship + dense network", "indicators": ["top-tier healthcare hub", "multiple high-URT nodes"] }
+      }
     },
     {
       "id": "police_security_presence",
       "name": "Police/Security Presence",
-      "description": "Safety and security for late evening operations",
+      "description": "Safety and security infrastructure for business operations",
       "weight": 2,
-      "maxScore": 5,
-      "category": "lower_priority",
-      "searchTypes": ["police"]
+      "category": "supportive",
+      "searchRadius": [400, 800, 1200],
+      "apiQueries": {
+        "types": ["police", "security_service", "fire_station", "embassy", "government_office"],
+        "keywords": ["police station", "police chowki", "thana", "security services", "SIS India", "G4S Security"]
+      },
+      "slabCriteria": {
+        "1": { "description": "No police chowki/station in 1200m", "indicators": ["low safety zone", "unsafe", "no police presence"] },
+        "2": { "description": "1 small police chowki, few mentions", "indicators": ["basic safety", "avg rating <3.5"] },
+        "3": { "description": "1 full police station or 2+ chowkis", "indicators": ["standard urban safety", "police responsive"] },
+        "4": { "description": "1 big station + 2 chowkis + private security", "indicators": ["strong police + private mix", "safe area", "URT 200+"] },
+        "5": { "description": "Dense police + embassy/mall landmarks", "indicators": ["premium high-security", "very safe", "constant patrolling"] }
+      }
+    },
+    {
+      "id": "outdoor_branding_scope",
+      "name": "Outdoor Branding Scope",
+      "description": "Visibility and branding opportunities for marketing",
+      "weight": 3,
+      "category": "medium_priority",
+      "searchRadius": [400, 800, 1200],
+      "calculationMethod": "infrastructure_analysis",
+      "indicators": {
+        "road_width": { "weight": 40, "description": "Road width and traffic volume" },
+        "footpath_quality": { "weight": 30, "description": "Footpath presence and quality" },
+        "visibility": { "weight": 20, "description": "Visibility from main roads" },
+        "competition": { "weight": 10, "description": "Existing signage density" }
+      },
+      "slabCriteria": {
+        "1": { "description": "Narrow lanes <3m, no footpaths, poor visibility", "indicators": ["no branding scope", "congested", "no space"] },
+        "2": { "description": "2-lane roads, broken footpaths, limited visibility", "indicators": ["limited branding", "mixed visibility"] },
+        "3": { "description": "2-4 lanes, usable footpaths, moderate visibility", "indicators": ["standard branding scope", "manageable traffic"] },
+        "4": { "description": "4-6 lanes, proper pavements, good visibility", "indicators": ["strong branding scope", "pedestrian friendly"] },
+        "5": { "description": "6+ lanes, broad plazas, premium visibility", "indicators": ["excellent branding", "premium boulevard"] }
+      }
     },
     {
       "id": "footpath_road_width",
       "name": "Footpath/Road Width",
-      "description": "Physical accessibility and setup space for cart operations",
-      "weight": 3,
-      "maxScore": 5,
-      "category": "medium_priority",
-      "calculatedFrom": ["accessibility_indicators", "infrastructure_quality"]
-    },
-    {
-      "id": "local_street_food_density",
-      "name": "Local Street Food Density",
-      "description": "Local street food vendor density indicating market acceptance and footfall generation",
-      "weight": 4,
-      "maxScore": 5,
-      "category": "high_priority",
-      "searchQueries": ["street food", "chaat", "golgappa", "samosa", "pakora", "dosa", "idli", "vada pav", "pani puri", "bhel puri"]
-    },
-    {
-      "id": "regional_food_preferences",
-      "name": "Regional Food Preferences",
-      "description": "Regional cuisine preferences indicating food diversity acceptance",
-      "weight": 3,
-      "maxScore": 5,
-      "category": "medium_priority",
-      "searchQueries": ["north indian", "south indian", "punjabi", "bengali", "gujarati", "rajasthani", "maharashtrian"]
-    },
-    {
-      "id": "educational_institution_proximity",
-      "name": "Educational Institution Proximity",
-      "description": "Educational hub proximity for consistent student customer base",
-      "weight": 4,
-      "maxScore": 5,
-      "category": "high_priority",
-      "searchTypes": ["university", "college", "school", "coaching_center", "training_institute"]
-    },
-    {
-      "id": "public_transport_connectivity",
-      "name": "Public Transport Connectivity",
-      "description": "Public transport accessibility for wider customer reach - critical in Indian context",
-      "weight": 3,
-      "maxScore": 5,
-      "category": "medium_priority",
-      "searchTypes": ["bus_station", "metro_station", "railway_station", "auto_stand", "transit_station"]
-    },
-    {
-      "id": "festival_season_potential",
-      "name": "Festival Season Potential",
-      "description": "Religious/community places indicating festival season business potential",
+      "description": "Physical infrastructure quality affecting accessibility and operations",
       "weight": 2,
-      "maxScore": 5,
-      "category": "lower_priority",
-      "searchTypes": ["temple", "gurudwara", "mosque", "church", "community_hall", "place_of_worship"]
+      "category": "supportive",
+      "searchRadius": [400, 800, 1200],
+      "calculationMethod": "infrastructure_assessment",
+      "components": {
+        "road_width": { "weight": 30, "description": "Actual road width in meters" },
+        "footpath_presence": { "weight": 30, "description": "Footpath availability and quality" },
+        "encroachment": { "weight": 15, "description": "Hawker/parking encroachment factor" },
+        "parking": { "weight": 10, "description": "Parking availability" },
+        "traffic": { "weight": 5, "description": "Traffic intensity" }
+      },
+      "slabCriteria": {
+        "1": { "description": "Road <3m, 1-lane only, no pavements", "indicators": ["narrow lanes", "no footpath", "encroachment"] },
+        "2": { "description": "2-lane (5-7m), broken footpaths, bikes parked", "indicators": ["small local roads", "mixed reviews"] },
+        "3": { "description": "2-4 lanes (8-12m), usable footpaths", "indicators": ["standard urban roads", "manageable walk"] },
+        "4": { "description": "4-6 lanes (12-20m), proper pavements", "indicators": ["wide arterial roads", "pedestrian friendly"] },
+        "5": { "description": "6+ lanes (20-25m) + broad pedestrian plazas", "indicators": ["premium boulevard", "excellent accessibility"] }
+      }
     }
   ],
-  "businessSearchTypes": [
-    {
-      "key": "restaurants",
-      "type": "restaurant",
-      "description": "All restaurants and eateries",
-      "weight": 3,
-      "footfallMultiplier": 3
+  "formatBasedWeights": {
+    "cart": {
+      "description": "Street cart format for Tier 2/3 cities",
+      "adjustments": {
+        "footfall": 25,
+        "student_vs_office_crowd_mix": 10,
+        "zomato_swiggy_delivery_density": 8
+      }
     },
-    {
-      "key": "meal_takeaway",
-      "type": "meal_takeaway", 
-      "description": "Food takeaway establishments",
-      "weight": 2.5,
-      "footfallMultiplier": 2.5
+    "cloud_kitchen": {
+      "description": "Delivery-focused cloud kitchen",
+      "adjustments": {
+        "zomato_swiggy_delivery_density": 25,
+        "spending_capacity": 15,
+        "footfall": 5
+      }
     },
-    {
-      "key": "cafes",
-      "type": "cafe",
-      "description": "Coffee shops and cafes",
-      "weight": 2,
-      "footfallMultiplier": 2
-    },
-    {
-      "key": "bakery",
-      "type": "bakery",
-      "description": "Bakeries and food vendors",
-      "weight": 2,
-      "footfallMultiplier": 2
-    },
-    {
-      "key": "universities",
-      "type": "university",
-      "description": "Higher education institutions",
-      "weight": 5,
-      "footfallMultiplier": 5
-    },
-    {
-      "key": "hospitals",
-      "type": "hospital",
-      "description": "Healthcare facilities",
-      "weight": 4,
-      "footfallMultiplier": 4
-    },
-    {
-      "key": "gas_stations",
-      "type": "gas_station",
-      "description": "Fuel stations",
-      "weight": 2,
-      "footfallMultiplier": 2
-    },
-    {
-      "key": "shopping_malls",
-      "type": "shopping_mall",
-      "description": "Shopping centers and malls",
-      "weight": 4,
-      "footfallMultiplier": 4
-    },
-    {
-      "key": "gyms",
-      "type": "gym",
-      "description": "Fitness centers and gyms",
-      "weight": 2,
-      "footfallMultiplier": 2
-    },
-    {
-      "key": "banks",
-      "type": "bank",
-      "description": "Banking facilities",
-      "weight": 1.5,
-      "footfallMultiplier": 1.5
-    },
-    {
-      "key": "atms",
-      "type": "atm",
-      "description": "ATM locations",
-      "weight": 1,
-      "footfallMultiplier": 1
-    },
-    {
-      "key": "pharmacies",
-      "type": "pharmacy",
-      "description": "Medical pharmacies",
-      "weight": 1.5,
-      "footfallMultiplier": 1.5
-    },
-    {
-      "key": "family_entertainment",
-      "type": "amusement_park",
-      "description": "Family entertainment venues",
-      "weight": 3,
-      "footfallMultiplier": 3
-    },
-    {
-      "key": "parks",
-      "type": "park",
-      "description": "Parks and recreational areas for families",
-      "weight": 2,
-      "footfallMultiplier": 2
-    },
-    {
-      "key": "health_food_stores",
-      "type": "health",
-      "description": "Health-conscious food establishments",
-      "weight": 2,
-      "footfallMultiplier": 2
-    },
-    {
-      "key": "bus_stations",
-      "type": "bus_station",
-      "description": "Bus stations and stops",
-      "weight": 3,
-      "footfallMultiplier": 3
-    },
-    {
-      "key": "metro_stations",
-      "type": "subway_station",
-      "description": "Metro/subway stations",
-      "weight": 4,
-      "footfallMultiplier": 4
-    },
-    {
-      "key": "railway_stations",
-      "type": "train_station",
-      "description": "Railway stations",
-      "weight": 5,
-      "footfallMultiplier": 5
-    },
-    {
-      "key": "temples",
-      "type": "hindu_temple",
-      "description": "Religious places - temples",
-      "weight": 2,
-      "footfallMultiplier": 2
-    },
-    {
-      "key": "places_of_worship",
-      "type": "place_of_worship",
-      "description": "All religious places",
-      "weight": 2,
-      "footfallMultiplier": 2
+    "cafe_premium": {
+      "description": "Café/premium dine-in outlet",
+      "adjustments": {
+        "nightlife_cafe_presence": 12,
+        "shopping_preferences_nearby": 8,
+        "footfall": 15
+      }
     }
-  ],
-  "brandCategories": {
-    "food_brands": {
-      "premium": ["Starbucks", "Costa Coffee", "McDonald's", "KFC", "Pizza Hut", "Domino's", "Sagar Ratna", "Haldiram's", "Wow! Momo", "Faasos", "Box8", "Behrouz Biryani", "Oven Story Pizza"],
-      "mid_range": ["Cafe Coffee Day", "Subway", "Burger King", "Bikanervala"],
-      "local": ["Local restaurants"]
-    },
-    "retail_brands": {
-      "international": ["H&M", "Zara", "Uniqlo", "Nike", "Adidas", "Puma", "Reebok"],
-      "national": ["Reliance Trends", "Max Fashion", "Lifestyle", "Shoppers Stop", "Pantaloons", "Central", "Westside", "Bata", "Liberty Shoes", "Raymond", "Titan", "Lenskart"],
-      "grocery": ["DMart", "Big Bazaar", "Reliance Fresh", "More", "Spencer's", "Star Bazaar", "Easyday"],
-      "fitness": ["Gold's Gym", "Anytime Fitness", "Cult.fit", "Snap Fitness", "Talwalkars"],
-      "regional": ["Local stores", "Regional chains", "Crossword"]
-    }
-  },
-  "competitionScoringRules": {
-    "optimal": { "minDensity": 8, "maxDensity": 15, "score": 5, "description": "Optimal - proven market with room" },
-    "good": { "minDensity": 5, "maxDensity": 8, "score": 4, "description": "Good - emerging market" },
-    "moderate": { "minDensity": 15, "maxDensity": 25, "score": 3, "description": "Moderate - saturated but viable" },
-    "low": { "minDensity": 0, "maxDensity": 5, "score": 2, "description": "Low - unproven market demand" },
-    "oversaturated": { "minDensity": 25, "maxDensity": 1000, "score": 1, "description": "Oversaturated" }
-  },
-  "footfallScoringRules": {
-    "businessWeights": {
-      "restaurant": 3,
-      "cafe": 2,
-      "bank": 1.5,
-      "hospital": 4,
-      "university": 5,
-      "shopping_mall": 4,
-      "gym": 2,
-      "gas_station": 2,
-      "bus_station": 3,
-      "subway_station": 4,
-      "train_station": 5
-    },
-    "ratingMultipliers": {
-      "highQuality": { "minRating": 4.0, "minReviews": 100, "multiplier": 1.3 },
-      "goodQuality": { "minRating": 3.5, "minReviews": 50, "multiplier": 1.1 },
-      "average": { "minRating": 3.0, "minReviews": 20, "multiplier": 1.0 },
-      "poor": { "minRating": 0, "minReviews": 10, "multiplier": 0.7 },
-      "lowConfidence": { "minRating": 0, "minReviews": 0, "multiplier": 0.8 }
-    }
-  },
-  "validFoodTypes": ["restaurant", "meal_takeaway", "cafe", "bakery", "bar"],
-  "excludedFromFoodSearch": ["bank", "atm", "finance", "insurance_agency", "accounting", "real_estate_agency"],
-  "foodKeywords": ["restaurant", "cafe", "food", "kitchen", "dining", "eatery", "dhaba", "hotel", "mess", "canteen", "tiffin"],
-  "scoringRules": {
-    "excellent": { "min": 4.5, "description": "Exceptional for business" },
-    "good": { "min": 3.5, "description": "Good potential" },
-    "average": { "min": 2.5, "description": "Average conditions" },
-    "poor": { "min": 1.5, "description": "Below average" },
-    "very_poor": { "min": 0, "description": "Not suitable" }
-  },
-  "viabilityThresholds": {
-    "highly_recommended": { "min": 80, "grade": "A" },
-    "recommended": { "min": 70, "grade": "B" },
-    "conditional": { "min": 60, "grade": "C" },
-    "not_recommended": { "min": 0, "grade": "D" }
   },
   "confidenceFactors": {
-    "apiResponseQuality": {
-      "allAPIsSuccessful": 1.0,
-      "someAPIsFailed": 0.8,
-      "majorAPIsFailed": 0.6
+    "data_coverage": {
+      "weight": 40,
+      "description": "Percentage of parameters with sufficient data"
     },
-    "dataCompleteness": {
-      "completeBusinessData": 1.0,
-      "partialData": 0.8,
-      "limitedData": 0.6
+    "radius_consistency": {
+      "weight": 30,
+      "description": "Consistency across 400m, 800m, 1200m radius"
     },
-    "radiusCompliance": {
-      "perfect": 1.0,
-      "good": 0.9,
-      "moderate": 0.7
+    "review_density": {
+      "weight": 20,
+      "description": "Average reviews per POI indicating data reliability"
     },
-    "brandDetectionAccuracy": {
-      "verified": 1.0,
-      "likely": 0.8,
-      "uncertain": 0.6
+    "brand_recognition": {
+      "weight": 10,
+      "description": "Clarity of brand identification"
     }
   },
-  "progressiveLoading": {
-    "phase1": {
-      "name": "Critical Data",
-      "timeEstimate": "15-20 seconds",
-      "businessTypes": ["restaurants", "universities", "hospitals", "shopping_malls"],
-      "topBrands": ["McDonald's", "KFC", "Domino's", "Pizza Hut", "Starbucks", "Wow! Momo", "Haldiram's", "Cafe Coffee Day", "Subway", "Burger King"],
-      "message": "🚀 Loading critical business data..."
-    },
-    "phase2": {
-      "name": "Important Data", 
-      "timeEstimate": "30-45 seconds",
-      "businessTypes": ["cafes", "gyms", "banks", "gas_stations", "pharmacies", "bakery"],
-      "midTierBrands": ["H&M", "Zara", "Nike", "Adidas", "DMart", "Reliance Trends", "Big Bazaar", "Bata", "Liberty Shoes"],
-      "message": "📊 Enhancing analysis with additional data..."
-    },
-    "phase3": {
-      "name": "Comprehensive Data",
-      "timeEstimate": "60-90 seconds", 
-      "businessTypes": ["atms", "family_entertainment", "parks", "health_food_stores", "bus_stations", "metro_stations", "railway_stations", "temples", "places_of_worship"],
-      "remainingBrands": "all_remaining",
-      "message": "🔍 Completing comprehensive analysis..."
-    }
-  },
-  "timeBasedWeighting": {
-    "businessHourMultipliers": {
-      "restaurant": {
-        "peakStreetFoodHours": { "start": 16, "end": 23, "multiplier": 2.2 },
-        "lunchHours": { "start": 12, "end": 15, "multiplier": 1.3 },
-        "offHours": { "multiplier": 0.4 }
+  "apiConfiguration": {
+    "googleMaps": {
+      "placesNearby": {
+        "maxResults": 60,
+        "minPrice": 0,
+        "maxPrice": 4
       },
-      "university": {
-        "activeHours": { "start": 8, "end": 18, "multiplier": 1.8 },
-        "eveningHours": { "start": 16, "end": 21, "multiplier": 2.0 },
-        "weekends": { "multiplier": 0.4 }
+      "placeDetails": {
+        "fields": ["name", "types", "rating", "user_ratings_total", "price_level", "opening_hours", "reviews", "photos", "geometry", "business_status"]
       },
-      "office": {
-        "workingHours": { "start": 9, "end": 18, "multiplier": 1.4 },
-        "eveningRush": { "start": 18, "end": 20, "multiplier": 2.1 },
-        "lunchRush": { "start": 12, "end": 14, "multiplier": 1.5 }
-      },
-      "shopping_mall": {
-        "peakHours": { "start": 16, "end": 22, "multiplier": 1.9 },
-        "weekendPeak": { "start": 11, "end": 23, "multiplier": 2.0 }
+      "textSearch": {
+        "maxResults": 20
       }
     },
-    "peakStreetFoodHours": [16, 17, 18, 19, 20, 21, 22, 23],
-    "seasonalFactors": {
-      "winter": 1.4,
-      "monsoon": 0.6,
-      "summer": 0.9
-    }
-  },
-  "regionalMarketIntelligence": {
-    "cityTiers": {
-      "tier1": {
-        "cities": ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Hyderabad", "Pune"],
-        "businessViability": "challenging",
-        "characteristics": {
-          "averageMomoPrice": "₹80-150",
-          "competitionLevel": "very high",
-          "operationalCost": "very high",
-          "setupCost": "₹5-8 lakhs",
-          "marketSaturation": "high",
-          "customerAcquisitionCost": "high",
-          "viabilityScore": 2.5
-        }
-      },
-      "tier2": {
-        "cities": ["Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Bhopal", "Ludhiana", "Agra", "Vadodara", "Surat", "Ahmedabad", "Patna", "Guwahati"],
-        "businessViability": "excellent",
-        "characteristics": {
-          "averageMomoPrice": "₹60-120",
-          "competitionLevel": "moderate",
-          "operationalCost": "moderate", 
-          "setupCost": "₹3-5 lakhs",
-          "marketSaturation": "optimal",
-          "customerAcquisitionCost": "moderate",
-          "viabilityScore": 4.5
-        }
-      },
-      "tier3": {
-        "cities": ["Smaller cities and towns"],
-        "businessViability": "very good",
-        "characteristics": {
-          "averageMomoPrice": "₹40-80",
-          "competitionLevel": "low to moderate",
-          "operationalCost": "low",
-          "setupCost": "₹2-3 lakhs", 
-          "marketSaturation": "low",
-          "customerAcquisitionCost": "low",
-          "viabilityScore": 4.0
-        }
-      }
-    },
-    "regionalPreferences": {
-      "north": {
-        "momoVarieties": ["chicken", "veg", "paneer"],
-        "spiceLevel": "medium",
-        "preferredSides": ["chutney", "soup"]
-      },
-      "south": {
-        "momoVarieties": ["veg", "chicken", "cheese"],
-        "spiceLevel": "high",
-        "preferredSides": ["coconut chutney", "sambar"]
-      },
-      "east": {
-        "momoVarieties": ["pork", "chicken", "veg"],
-        "spiceLevel": "medium", 
-        "preferredSides": ["traditional tibetan sauce"]
-      },
-      "west": {
-        "momoVarieties": ["veg", "chicken", "cheese"],
-        "spiceLevel": "medium",
-        "preferredSides": ["mayonnaise", "ketchup"]
-      }
-    }
-  },
-  "advancedValidationRules": {
-    "nameTypeConsistency": {
-      "restaurant": {
-        "excludePatterns": ["bank", "atm", "hospital", "school", "clinic"],
-        "includePatterns": ["restaurant", "cafe", "food", "kitchen", "dining", "eatery", "dhaba", "hotel"]
-      },
-      "university": {
-        "excludePatterns": ["restaurant", "shop", "medical", "bank"],
-        "includePatterns": ["university", "college", "institute", "school", "education"]
-      },
-      "hospital": {
-        "excludePatterns": ["food", "restaurant", "shop", "cafe"],
-        "includePatterns": ["hospital", "clinic", "medical", "health", "doctor"]
-      }
-    },
-    "ratingConsistency": {
-      "suspiciouslyHigh": { "minRating": 4.8, "maxReviews": 10 },
-      "suspiciouslyLow": { "maxRating": 2.0, "maxReviews": 5 }
-    },
-    "duplicateDetection": {
-      "nameThreshold": 0.8,
-      "locationThreshold": 50
+    "rateLimits": {
+      "requestsPerSecond": 10,
+      "dailyLimit": 2500
     }
   }
-} 
+}

@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const location_module_1 = require("./modules/location/location.module");
 const gemini_module_1 = require("./modules/gemini/gemini.module");
+const health_module_1 = require("./modules/health/health.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -23,6 +24,7 @@ exports.AppModule = AppModule = __decorate([
             }),
             location_module_1.LocationModule,
             gemini_module_1.GeminiModule,
+            health_module_1.HealthModule,
         ],
         controllers: [],
         providers: [],

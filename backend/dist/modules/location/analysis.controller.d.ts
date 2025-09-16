@@ -1,87 +1,81 @@
 import { LocationService } from './location.service';
-import { GeminiService } from '../gemini/gemini.service';
 interface CompleteAnalysisDto {
     lat: number;
     lng: number;
     radius?: number;
+    format?: 'cart' | 'cloud_kitchen' | 'cafe_premium';
     clientName?: string;
     address?: string;
 }
 export declare class AnalysisController {
     private readonly locationService;
-    private readonly geminiService;
-    constructor(locationService: LocationService, geminiService: GeminiService);
+    constructor(locationService: LocationService);
     completeAnalysis(body: CompleteAnalysisDto): Promise<{
         success: boolean;
-        data: {
+        timestamp: string;
+        location: {
             coordinates: {
                 lat: number;
                 lng: number;
-                radius: number;
             };
-            locationInfo: {
-                formattedAddress: string;
-                city: string;
-                state: string;
-                country: string;
-                postalCode: string;
-                neighborhood: string;
-                addressComponents: any[];
-                placeId?: undefined;
-                geometry?: undefined;
-            } | {
-                formattedAddress: any;
-                city: string;
-                state: string;
-                country: string;
-                postalCode: string;
-                neighborhood: string;
-                addressComponents: any;
-                placeId: any;
-                geometry: any;
+            radius: number;
+            format: string;
+            clientName: string;
+            address: any;
+            city: any;
+            state: any;
+            country: any;
+            postalCode: any;
+        };
+        evaluation: {
+            overall: {
+                percentage: number;
+                grade: string;
+                confidence: number;
+                totalScore: number;
             };
-            locationAnalysis: any;
-            areaCharacteristics: {
-                food_competition: {
-                    total_restaurants: any;
-                    average_rating: any;
-                    high_rated_restaurants: any;
-                    popular_restaurants: any;
-                };
-                commercial_activity: {
-                    total_businesses: any;
-                    shopping_options: any;
-                    clothing_stores: number;
-                };
-                demographics: {
-                    educational_institutions: any;
-                    healthcare_facilities: any;
-                    fitness_facilities: any;
-                    entertainment_options: number;
-                };
-                infrastructure: {
-                    petrol_stations: any;
-                    accessibility_score: number;
-                };
-            };
-            aiEvaluation: any;
-            clientInfo: {
+            parameters: {
+                id: string;
                 name: string;
-                providedAddress: string;
-            };
-            timestamp: string;
+                slab: number;
+                score: number;
+                weight: number;
+                confidence: number;
+                reason: string;
+                indicators: string[];
+            }[];
+            formatAdjustments: any;
+            recommendations: string[];
         };
-        message: string;
+        methodology: {
+            framework: string;
+            version: string;
+            totalParameters: number;
+            slabSystem: string;
+        };
     }>;
-    private extractLocationDetails;
-    private extractAreaCharacteristics;
-    healthCheck(): Promise<{
+    getEvaluationConfig(): Promise<{
         success: boolean;
-        message: string;
-        services: {
-            location: string;
-            gemini: string;
+        config: {
+            framework: any;
+            parameters: any;
+            formatOptions: string[];
+            slabSystem: any;
         };
+    }>;
+    validateLocation(body: {
+        lat: number;
+        lng: number;
+        radius?: number;
+        format?: string;
+    }): Promise<{
+        valid: boolean;
+        errors: string[];
+    }>;
+    healthCheck(): Promise<{
+        status: string;
+        service: string;
+        framework: string;
         timestamp: string;
     }>;
 }

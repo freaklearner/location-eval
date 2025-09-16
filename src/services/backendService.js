@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3002/api';
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
@@ -106,7 +106,7 @@ class BackendService {
         onProgress?.('📊 Generating comprehensive report...');
         await new Promise(resolve => setTimeout(resolve, 500));
         onProgress?.('✅ Analysis completed successfully!');
-        return response.data.data;
+        return response.data;
       } else {
         throw new Error(response.data.message || 'Analysis failed');
       }
@@ -178,10 +178,10 @@ class BackendService {
           message: '✅ Analysis completed successfully!',
           timeEstimate: 'Complete',
           isComplete: true,
-          data: response.data.data
+          data: response.data
         });
         
-        return response.data.data;
+        return response.data;
       } else {
         throw new Error(response.data.message || 'Progressive analysis failed');
       }
@@ -294,16 +294,16 @@ class BackendService {
       ]);
 
       return {
-        location: locationHealth.status === 'fulfilled' ? locationHealth.value.data : { success: false },
-        gemini: geminiHealth.status === 'fulfilled' ? geminiHealth.value.data : { success: false },
-        analysis: analysisHealth.status === 'fulfilled' ? analysisHealth.value.data : { success: false },
+        location: locationHealth.status === 'fulfilled' ? locationHealth.value.data : { status: 'unhealthy' },
+        gemini: geminiHealth.status === 'fulfilled' ? geminiHealth.value.data : { status: 'unhealthy' },
+        analysis: analysisHealth.status === 'fulfilled' ? analysisHealth.value.data : { status: 'unhealthy' },
       };
     } catch (error) {
       console.error('Health check failed:', error);
       return {
-        location: { success: false },
-        gemini: { success: false },
-        analysis: { success: false },
+        location: { status: 'unhealthy' },
+        gemini: { status: 'unhealthy' },
+        analysis: { status: 'unhealthy' },
       };
     }
   }
@@ -312,7 +312,7 @@ class BackendService {
   async isBackendAvailable() {
     try {
       const health = await this.checkHealth();
-      return health.analysis.success || health.location.success;
+      return (health.analysis.status === 'healthy') || (health.location.status === 'healthy');
     } catch (error) {
       return false;
     }

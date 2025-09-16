@@ -1,45 +1,62 @@
 import { ConfigService } from '@nestjs/config';
-interface LocationAnalysisRequest {
+export interface LocationData {
     lat: number;
     lng: number;
     radius?: number;
+    format?: 'cart' | 'cloud_kitchen' | 'cafe_premium';
 }
-export interface BusinessSearchResult {
-    results: any[];
-    status: string;
+interface ParameterResult {
+    id: string;
+    name: string;
+    slab: number;
+    score: number;
+    confidence: number;
+    weight: number;
+    reason: string;
+    indicators: string[];
+    rawData?: any;
 }
-interface EvaluationConfig {
-    evaluationParameters: any[];
-    businessSearchTypes: any[];
-    brandCategories: any;
-    scoringRules: any;
-    viabilityThresholds: any;
+export interface EvaluationResult {
+    totalScore: number;
+    percentage: number;
+    grade: string;
+    confidence: number;
+    parameters: ParameterResult[];
+    formatAdjustments?: any;
+    recommendations: string[];
+    locationDetails: any;
 }
 export declare class LocationService {
     private configService;
     private readonly googleMapsApiKey;
-    private readonly baseUrl;
     private evaluationConfig;
-    private readonly RADIUS_TOLERANCE_PERCENT;
     constructor(configService: ConfigService);
     private loadEvaluationConfig;
-    private getDefaultConfig;
-    getEvaluationConfig(): EvaluationConfig;
-    private calculateHaversineDistance;
-    private toRadians;
-    private validateRadiusCompliance;
-    private filterByBusinessType;
-    private isValidBrandMatch;
-    findNearbyBusinesses(lat: number, lng: number, type: string, userRadius: number): Promise<BusinessSearchResult>;
-    searchByText(lat: number, lng: number, query: string, userRadius: number): Promise<BusinessSearchResult>;
-    getLocationInfo(lat: number, lng: number): Promise<any>;
-    analyzeLocation(request: LocationAnalysisRequest): Promise<any>;
-    private getAllBrandsFromConfig;
-    private getAlternativeBrandQueries;
-    private generateSummary;
-    private calculateAverageRating;
-    private calculateOverallAverageRating;
-    private calculateBusinessDensity;
-    private calculateCompetitionLevel;
+    evaluateLocation(locationData: LocationData): Promise<EvaluationResult>;
+    private evaluateParameter;
+    private fetchParameterData;
+    private fetchNearbyPlaces;
+    private fetchTextSearch;
+    private reverseGeocode;
+    private extractAddressComponent;
+    private extractSignals;
+    private analyzeProxies;
+    private calculateBrandTierMix;
+    private calculateQualityScore;
+    private calculatePriceScore;
+    private calculateParameterIndex;
+    private assignSlab;
+    private calculateConfidence;
+    private calculateFinalScore;
+    private applyFormatAdjustments;
+    private calculateGrade;
+    private generateRecommendations;
+    private flattenKeywords;
+    private removeDuplicatePlaces;
+    getEvaluationConfig(): any;
+    validateLocationData(locationData: LocationData): {
+        valid: boolean;
+        errors: string[];
+    };
 }
 export {};

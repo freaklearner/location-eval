@@ -224,7 +224,7 @@ const AnalysisResults = ({ results, onReset }) => {
         <div class="section">
           <h3>📋 Detailed Parameter Analysis</h3>
           ${Object.keys(parameterData).length > 0 ? Object.entries(parameterData).map(([key, data]) => {
-            const parameterInfo = evaluationParameters.find(p => p.key === key) || { name: key, weight: 1, maxScore: 5 };
+            const parameterInfo = evaluationParameters.find(p => p.key === key) || { name: key, weight: 1, maxScore: 100 };
             return `
               <div class="parameter">
                 <div>
@@ -232,7 +232,7 @@ const AnalysisResults = ({ results, onReset }) => {
                   <div class="parameter-reasoning">${data.reasoning || 'No reasoning provided'}</div>
                 </div>
                 <div class="parameter-score">
-                  ${data.score || 0}/5 (${data.weightedScore || 0} pts)
+                  ${Math.round((data.score || 0) * 100) / 100}/100 (${Math.round((data.weightedScore || 0) * 100) / 100} pts)
                 </div>
               </div>
             `;
@@ -749,7 +749,7 @@ const AnalysisResults = ({ results, onReset }) => {
         {hasParameterData ? (
           <div className="parameters-grid">
             {Object.entries(parameterData).map(([key, data]) => {
-              const parameterInfo = evaluationParameters.find(p => p.key === key) || { name: key, weight: 1, maxScore: 5 };
+              const parameterInfo = evaluationParameters.find(p => p.key === key) || { name: key, weight: 1, maxScore: 100 };
               const baselineData = baselineScores?.[key];
               const hasBaseline = baselineData && showBaselineComparison;
               const adjustment = data.adjustment || (baselineData ? data.score - baselineData.score : 0);
@@ -759,11 +759,11 @@ const AnalysisResults = ({ results, onReset }) => {
                   <div className="parameter-header">
                     <h4>{parameterInfo.name}</h4>
                     <div className="parameter-score">
-                      <span className="score">{data.score}/5</span>
+                      <span className="score">{Math.round(data.score * 100) / 100}/100</span>
                       <span className="weighted">({data.weightedScore} pts)</span>
                       {hasBaseline && (
                         <div className="baseline-info">
-                          <span className="baseline-score">Baseline: {baselineData.score}/5</span>
+                          <span className="baseline-score">Baseline: {Math.round(baselineData.score * 100) / 100}/100</span>
                           {adjustment !== 0 && (
                             <span className={`adjustment ${adjustment > 0 ? 'positive' : 'negative'}`}>
                               ({adjustment > 0 ? '+' : ''}{adjustment})
@@ -779,17 +779,17 @@ const AnalysisResults = ({ results, onReset }) => {
                       <div className="score-bar-container">
                         <div 
                           className="baseline-bar" 
-                          style={{ width: `${(baselineData.score / 5) * 100}%` }}
-                          title={`Baseline: ${baselineData.score}/5`}
+                          style={{ width: `${(baselineData.score / 100) * 100}%` }}
+                          title={`Baseline: ${Math.round(baselineData.score * 100) / 100}/100`}
                         />
                         <div 
                           className="actual-bar" 
                           style={{ 
-                            width: `${(data.score / 5) * 100}%`,
+                            width: `${(data.score / 100) * 100}%`,
                             backgroundColor: data.score > baselineData.score ? '#22c55e' : 
                                            data.score < baselineData.score ? '#f97316' : '#3b82f6'
                           }}
-                          title={`AI Score: ${data.score}/5`}
+                          title={`AI Score: ${Math.round(data.score * 100) / 100}/100`}
                         />
                       </div>
                       <div className="bar-legend">

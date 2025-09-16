@@ -179,10 +179,10 @@ const EnhancedResultsDisplay = ({ results, onReset }) => {
                     <div className="parameter-header">
                       <h4>{param.name}</h4>
                       <div className="score-display">
-                        <span className="current-score">{param.score}/5</span>
+                        <span className="current-score">{Math.round(param.score * 100) / 100}/100</span>
                         {showBaselineComparison && param.baselineScore && (
                           <span className="baseline-score">
-                            (Baseline: {param.baselineScore}/5)
+                            (Baseline: {Math.round(param.baselineScore * 100) / 100}/100)
                           </span>
                         )}
                       </div>

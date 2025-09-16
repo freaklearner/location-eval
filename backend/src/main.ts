@@ -12,8 +12,10 @@ async function bootstrap() {
     frontendUrl,
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://localhost:3003',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
+    'http://127.0.0.1:3003',
   ];
 
   // Add HTTPS version if frontend URL is HTTPS
@@ -36,7 +38,7 @@ async function bootstrap() {
   server.keepAliveTimeout = 65000; // Keep-alive timeout
   server.headersTimeout = 66000; // Headers timeout
 
-  const port = configService.get('PORT', 3000);
+  const port = configService.get('PORT', 3002);
   
   console.log(`🚀 Server starting on port ${port}`);
   console.log(`📍 Google Maps API: ${configService.get('GOOGLE_MAPS_API_KEY') ? 'Configured' : 'Missing'}`);
