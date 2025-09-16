@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3002/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api';
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
@@ -311,9 +311,13 @@ class BackendService {
   // Utility method to check if backend is available
   async isBackendAvailable() {
     try {
+      console.log(`🔍 Checking backend availability at: ${API_BASE_URL}`);
       const health = await this.checkHealth();
-      return (health.analysis.status === 'healthy') || (health.location.status === 'healthy');
+      const isAvailable = (health.analysis.status === 'healthy') || (health.location.status === 'healthy');
+      console.log(`🌐 Backend availability result: ${isAvailable}`);
+      return isAvailable;
     } catch (error) {
+      console.error(`❌ Backend connection failed to ${API_BASE_URL}:`, error.message);
       return false;
     }
   }

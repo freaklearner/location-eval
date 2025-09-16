@@ -4,6 +4,10 @@ FROM node:18-alpine AS frontend-builder
 # Set working directory for frontend
 WORKDIR /app/frontend
 
+# Accept build argument for React app backend URL
+ARG REACT_APP_BACKEND_URL
+ENV REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
+
 # Copy frontend package files
 COPY package*.json ./
 COPY src/ ./src/

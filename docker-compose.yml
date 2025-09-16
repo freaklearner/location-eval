@@ -3,13 +3,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
     ports:
       - "3000:3000"  # Frontend
       - "3001:3001"  # Backend API
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=${FRONTEND_URL}
+      - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
       # Add your API keys here or use .env file
       - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
