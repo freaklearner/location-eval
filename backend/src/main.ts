@@ -16,12 +16,24 @@ async function bootstrap() {
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
     'http://127.0.0.1:3003',
+    // Add droplet IP addresses for CORS
+    'http://159.89.166.89',
+    'http://159.89.166.89:3000',
+    'https://159.89.166.89',
+    'https://159.89.166.89:3000',
+    // Add domain variations
+    'https://locationai.themomosmafia.in',
+    'http://locationai.themomosmafia.in',
+    'https://www.locationai.themomosmafia.in',
+    'http://www.locationai.themomosmafia.in',
   ];
 
   // Add HTTPS version if frontend URL is HTTPS
   if (frontendUrl.startsWith('https://')) {
     allowedOrigins.push(frontendUrl.replace('https://', 'http://'));
   }
+
+  console.log('🔒 CORS enabled for origins:', allowedOrigins);
 
   app.enableCors({
     origin: allowedOrigins,

@@ -41,8 +41,9 @@ cat > .env << 'EOF'
 NODE_ENV=production
 PORT=3001
 
-# Frontend and Backend URLs - Using HTTPS domain
-FRONTEND_URL=https://locationai.themomosmafia.in
+# Frontend and Backend URLs - FIXED FOR CORS ISSUE
+# Using IP address to match the origin the user is accessing from
+FRONTEND_URL=http://159.89.166.89:3000
 REACT_APP_BACKEND_URL=https://locationai.themomosmafia.in/api
 
 # Google Maps API Key
