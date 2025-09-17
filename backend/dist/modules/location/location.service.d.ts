@@ -39,6 +39,9 @@ export declare class LocationService {
     private fetchTextSearch;
     private reverseGeocode;
     private extractAddressComponent;
+    private calculateDistance;
+    private toRadians;
+    private filterPlacesByDistance;
     private extractSignals;
     private analyzeProxies;
     private calculateBrandTierMix;

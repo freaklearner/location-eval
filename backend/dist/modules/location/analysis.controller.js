@@ -58,7 +58,8 @@ let AnalysisController = class AnalysisController {
                         weight: param.weight,
                         confidence: param.confidence,
                         reason: param.reason,
-                        indicators: param.indicators
+                        indicators: param.indicators,
+                        rawData: param.rawData
                     })),
                     formatAdjustments: evaluationResult.formatAdjustments,
                     recommendations: evaluationResult.recommendations

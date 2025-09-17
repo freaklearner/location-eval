@@ -144,6 +144,13 @@ let LocationService = class LocationService {
         }
         allData.places = this.removeDuplicatePlaces(allData.places);
         allData.textSearchResults = this.removeDuplicatePlaces(allData.textSearchResults);
+        const actualRadius = locationData.radius || 800;
+        console.log(`📏 Filtering places for ${param.name} within ${actualRadius}m radius`);
+        const originalPlacesCount = allData.places.length;
+        const originalTextSearchCount = allData.textSearchResults.length;
+        allData.places = this.filterPlacesByDistance(allData.places, lat, lng, actualRadius);
+        allData.textSearchResults = this.filterPlacesByDistance(allData.textSearchResults, lat, lng, actualRadius);
+        console.log(`📊 ${param.name}: ${originalPlacesCount} → ${allData.places.length} places, ${originalTextSearchCount} → ${allData.textSearchResults.length} text results (after distance filtering)`);
         return allData;
     }
     async fetchNearbyPlaces(lat, lng, radius, type) {
@@ -235,6 +242,35 @@ let LocationService = class LocationService {
             }
         }
         return 'Unknown';
+    }
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000;
+        const dLat = this.toRadians(lat2 - lat1);
+        const dLng = this.toRadians(lng2 - lng1);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+        return Math.round(distance);
+    }
+    toRadians(degrees) {
+        return degrees * (Math.PI / 180);
+    }
+    filterPlacesByDistance(places, centerLat, centerLng, maxRadius) {
+        return places.filter(place => {
+            if (!place.geometry?.location?.lat || !place.geometry?.location?.lng) {
+                console.warn(`⚠️ Place "${place.name}" missing coordinates, excluding from results`);
+                return false;
+            }
+            const distance = this.calculateDistance(centerLat, centerLng, place.geometry.location.lat, place.geometry.location.lng);
+            const isWithinRadius = distance <= maxRadius;
+            if (!isWithinRadius) {
+                console.log(`📏 Place "${place.name}" at ${distance}m (excluded, radius: ${maxRadius}m)`);
+            }
+            place.calculated_distance = distance;
+            return isWithinRadius;
+        });
     }
     extractSignals(rawData, param) {
         const signals = {

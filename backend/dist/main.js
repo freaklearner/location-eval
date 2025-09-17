@@ -15,10 +15,19 @@ async function bootstrap() {
         'http://127.0.0.1:3000',
         'http://127.0.0.1:3001',
         'http://127.0.0.1:3003',
+        'http://159.89.166.89',
+        'http://159.89.166.89:3000',
+        'https://159.89.166.89',
+        'https://159.89.166.89:3000',
+        'https://locationai.themomosmafia.in',
+        'http://locationai.themomosmafia.in',
+        'https://www.locationai.themomosmafia.in',
+        'http://www.locationai.themomosmafia.in',
     ];
     if (frontendUrl.startsWith('https://')) {
         allowedOrigins.push(frontendUrl.replace('https://', 'http://'));
     }
+    console.log('🔒 CORS enabled for origins:', allowedOrigins);
     app.enableCors({
         origin: allowedOrigins,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

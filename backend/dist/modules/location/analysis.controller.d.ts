@@ -43,6 +43,7 @@ export declare class AnalysisController {
                 confidence: number;
                 reason: string;
                 indicators: string[];
+                rawData: any;
             }[];
             formatAdjustments: any;
             recommendations: string[];
